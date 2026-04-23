@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Mes Voyages</title>
+
+<!-- PWA Meta -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mes Voyages">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="description" content="Planificateur de voyages personnel">
+
+<!-- PWA Manifest (inline via data URI) -->
+<link rel="manifest" href="data:application/json;charset=utf-8,{
+  %22name%22:%22Mes%20Voyages%22,
+  %22short_name%22:%22Voyages%22,
+  %22description%22:%22Planificateur%20de%20voyages%20personnel%22,
+  %22start_url%22:%22.%2Findex.html%22,
+  %22display%22:%22standalone%22,
+  %22orientation%22:%22portrait%22,
+  %22background_color%22:%22%231a1a2e%22,
+  %22theme_color%22:%22%231a1a2e%22,
+  %22icons%22:[
+    {%22src%22:%22data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20512%20512'%3E%3Crect%20width%3D'512'%20height%3D'512'%20rx%3D'80'%20fill%3D'%231a1a2e'%2F%3E%3Ctext%20x%3D'256'%20y%3D'340'%20font-size%3D'300'%20text-anchor%3D'middle'%3E%E2%9C%88%3C%2Ftext%3E%3C%2Fsvg%3E%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22}
+  ]
+}">
+
+<!-- Apple Touch Icon (inline SVG → PNG via canvas trick not needed, use inline SVG) -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%231a1a2e'/><text x='256' y='340' font-size='300' text-anchor='middle'>✈</text></svg>">
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a2e; --paper: #faf7f2; --sand: #e8dfc8; --sand2: #f0ead8;
+  --terra: #c17f5a; --ocean: #2e6b8a; --forest: #4a7c59; --sunset: #e8845a; --gold: #d4a843;
+  --s-plan-bg:#fffbea; --s-plan-bd:#f0c040; --s-plan-tx:#92710a;
+  --s-confirm-bg:#edfaf3; --s-confirm-bd:#3aad6e; --s-confirm-tx:#1e6b44;
+  --s-cancel-bg:#fdecea; --s-cancel-bd:#c0392b; --s-cancel-tx:#922b21;
+  --r:12px; --sh:0 4px 24px rgba(26,26,46,.10); --sh2:0 12px 40px rgba(26,26,46,.18);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
+
+/* HEADER */
+header{background:var(--ink);color:var(--paper);padding:14px 24px;padding-top:max(14px,env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,.3);gap:10px;flex-wrap:wrap}
+header h1{font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:700;white-space:nowrap}
+header h1 span{color:var(--gold)}
+.version{font-size:.65rem;color:rgba(255,255,255,.35);align-self:flex-end;margin-bottom:2px;margin-left:4px}
+.hr{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.vtoggle{display:flex;background:rgba(255,255,255,.1);border-radius:8px;overflow:hidden}
+.vbtn{padding:7px 13px;border:none;background:transparent;color:rgba(255,255,255,.6);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;transition:all .2s}
+.vbtn.active{background:var(--gold);color:var(--ink);font-weight:500}
+.bio{background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.18);padding:7px 11px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;transition:background .2s;white-space:nowrap}
+.bio:hover{background:rgba(255,255,255,.22);color:#fff}
+.badd{background:var(--terra);color:#fff;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:500;white-space:nowrap;transition:background .2s,transform .1s}
+.badd:hover{background:var(--sunset);transform:translateY(-1px)}
+
+/* FILTER TABS */
+.fbar{display:flex;gap:0;align-items:stretch;border-bottom:none;padding:0;background:transparent}
+.ftab{padding:10px 22px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;transition:all .2s;letter-spacing:.3px;border-bottom:3px solid transparent;opacity:.55;filter:saturate(.6)}
+.ftab:hover{opacity:.8;filter:saturate(.9)}
+/* Each tab keeps its own color permanently */
+.ftab[data-f="all"]{background:var(--ink);color:rgba(255,255,255,.9)}
+.ftab[data-f="plan"]{background:var(--s-plan-bg);color:var(--s-plan-tx)}
+.ftab[data-f="confirm"]{background:var(--s-confirm-bg);color:var(--s-confirm-tx)}
+.ftab[data-f="cancel"]{background:var(--s-cancel-bg);color:var(--s-cancel-tx)}
+/* Active state: full color, border, elevated */
+.ftab.fa{opacity:1;filter:none;border-bottom:3px solid var(--ink);box-shadow:0 -2px 8px rgba(0,0,0,.15)}
+.ftab.fp{opacity:1;filter:none;border-bottom:3px solid var(--s-plan-bd);box-shadow:0 -2px 8px rgba(146,113,10,.15)}
+.ftab.fc{opacity:1;filter:none;border-bottom:3px solid var(--s-confirm-bd);box-shadow:0 -2px 8px rgba(30,107,68,.15)}
+.ftab.fx{opacity:1;filter:none;border-bottom:3px solid var(--s-cancel-bd);box-shadow:0 -2px 8px rgba(146,43,33,.15)}
+
+/* STATS BAR */
+.sbar{display:flex;border-bottom:1px solid rgba(0,0,0,.2);flex-wrap:wrap;background:#1a1a2e;align-items:stretch}
+/* Left colored block: s1 + s2 */
+.sbar-left{display:flex;gap:24px;padding:11px 24px;transition:background .25s,color .25s;align-items:center}
+.sbar-left.tc-all{background:rgba(255,255,255,.06)}
+.sbar-left.tc-plan{background:var(--s-plan-bg)}
+.sbar-left.tc-confirm{background:var(--s-confirm-bg)}
+.sbar-left.tc-cancel{background:var(--s-cancel-bg)}
+.sbar-left .stv{transition:color .25s}
+.sbar-left.tc-all .stv{color:#fff}
+.sbar-left.tc-plan .stv{color:var(--s-plan-tx)}
+.sbar-left.tc-confirm .stv{color:var(--s-confirm-tx)}
+.sbar-left.tc-cancel .stv{color:var(--s-cancel-tx)}
+.sbar-left.tc-all .stl{color:rgba(255,255,255,.4)}
+.sbar-left.tc-plan .stl,.sbar-left.tc-confirm .stl,.sbar-left.tc-cancel .stl{color:rgba(0,0,0,.45)}
+/* Separator between left block and fixed stats */
+.sbar-sep{width:1px;background:rgba(255,255,255,.12);margin:8px 0}
+/* Right fixed block: budget + prochain */
+.sbar-right{display:flex;gap:24px;padding:11px 24px;align-items:center;flex-wrap:wrap}
+.st{display:flex;flex-direction:column}
+.stv{font-family:'DM Sans',sans-serif;font-size:1.25rem;font-weight:700;color:rgba(255,255,255,.75);letter-spacing:-.3px}
+.stl{font-size:.7rem;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px;font-family:'DM Sans',sans-serif}
+
+/* MAIN */
+main{padding:22px 24px}
+.view{display:none}.view.active{display:block}
+
+/* GANTT */
+.th{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.ynav{display:flex;align-items:center;gap:12px}
+.nbtn{background:none;border:2px solid var(--ink);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:.95rem;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.nbtn:hover{background:var(--ink);color:#fff}
+.ylbl{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;min-width:64px;text-align:center}
+
+/* Outer wrapper */
+.gwrap{background:#fff;border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
+
+/* Scroll container — scrolls horizontally, hides scrollbar, touch-friendly */
+.gscroll{overflow-x:scroll;-webkit-overflow-scrolling:touch;scrollbar-width:none;cursor:grab}
+.gscroll::-webkit-scrollbar{display:none}
+.gscroll.dragging{cursor:grabbing;user-select:none}
+
+/* Inner table: label col (fixed px) + 12 month cols (each --mcw px) */
+.gtable{display:inline-flex;flex-direction:column;min-width:100%}
+
+/* Header */
+.gantt-head{display:flex;user-select:none;background:var(--theme-bg,var(--ink));color:var(--theme-tx,#fff);transition:background .25s,color .25s}
+.gh-label{width:210px;min-width:210px;padding:10px 12px;font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--theme-tx,rgba(255,255,255,.85));border-right:1px solid var(--theme-sep,rgba(255,255,255,.1));position:sticky;left:0;z-index:4;background:var(--theme-bg,var(--ink));box-sizing:border-box;font-weight:700;transition:background .25s,color .25s}
+.gh-mon{width:var(--mcw,80px);min-width:var(--mcw,80px);padding:10px 3px;text-align:center;font-size:.78rem;font-weight:500;border-right:1px solid var(--theme-sep,rgba(255,255,255,.1));box-sizing:border-box;flex-shrink:0}
+.gh-mon.cur{background:rgba(0,0,0,.1);font-weight:700}
+
+/* Data rows */
+.gantt-row{display:flex;border-bottom:1px solid var(--sand);min-height:56px;cursor:pointer;transition:background .15s}
+.gantt-row:hover{background:#faf5ee}.gantt-row:last-child{border-bottom:none}
+.ginfo{width:210px;min-width:210px;padding:8px 12px;display:flex;flex-direction:column;justify-content:center;gap:2px;border-right:1px solid var(--sand);position:sticky;left:0;background:#fff;z-index:2;box-shadow:3px 0 8px rgba(0,0,0,.06);box-sizing:border-box;flex-shrink:0}
+.gantt-row:hover .ginfo{background:#faf5ee}
+.gdest{font-weight:500;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ghotel{font-size:.75rem;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:italic}
+.gmeta{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.gdur{font-size:.7rem;color:#aaa}
+
+/* Month cells */
+.gcols{display:flex;flex:1;position:relative}
+.gcol{width:var(--mcw,80px);min-width:var(--mcw,80px);border-right:1px solid var(--sand);box-sizing:border-box;flex-shrink:0}
+.gcol.cur{background:rgba(212,168,67,.06)}
+
+/* Bar track */
+.gbar-track{position:absolute;inset:0;pointer-events:none}
+.gbar{position:absolute;height:26px;top:50%;transform:translateY(-50%);border-radius:5px;display:flex;align-items:center;padding:0 7px;font-size:.72rem;font-weight:500;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 2px 6px rgba(0,0,0,.2);pointer-events:all}
+.gbar:hover{opacity:.82}
+.gbar.sp{opacity:.65;background-image:repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(255,255,255,.15) 4px,rgba(255,255,255,.15) 8px)}
+.gbar.sx{opacity:.3}
+.gempty{padding:36px;text-align:center;color:#ccc;font-style:italic}
+
+/* CALENDAR */
+.ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.cnav{display:flex;align-items:center;gap:12px}
+.ctitle{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;min-width:200px;text-align:center}
+.cgrid{background:#fff;border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
+.cdh{display:grid;grid-template-columns:repeat(7,1fr);background:var(--theme-bg,var(--ink));color:var(--theme-tx,#fff);transition:background .25s,color .25s}
+.cdn{padding:10px;text-align:center;font-size:.76rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.cbody{display:grid;grid-template-columns:repeat(7,1fr)}
+.ccell{min-height:76px;padding:5px;border-right:1px solid var(--sand);border-bottom:1px solid var(--sand)}
+.ccell:nth-child(7n){border-right:none}
+.ccell.om{background:#f7f7f5}
+.ccell.td .cdate{background:var(--terra);color:#fff;border-radius:50%;width:23px;height:23px;display:flex;align-items:center;justify-content:center}
+.cdate{font-size:.79rem;font-weight:500;margin-bottom:3px;display:inline-block;width:23px;height:23px;line-height:23px;text-align:center}
+.cev{font-size:.67rem;padding:2px 5px;border-radius:3px;margin-bottom:2px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.cev.sp{opacity:.6}
+.cev.sx{opacity:.38;text-decoration:line-through}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:.72rem;font-weight:500;border:1.5px solid transparent}
+.bp{background:var(--s-plan-bg);border-color:var(--s-plan-bd);color:var(--s-plan-tx)}
+.bc{background:var(--s-confirm-bg);border-color:var(--s-confirm-bd);color:var(--s-confirm-tx)}
+.bx{background:var(--s-cancel-bg);border-color:var(--s-cancel-bd);color:var(--s-cancel-tx)}
+
+/* OVERLAY / MODAL */
+.overlay{position:fixed;inset:0;background:rgba(26,26,46,.55);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center;padding:14px}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:620px;max-height:93vh;overflow-y:auto;box-shadow:var(--sh2);animation:mIn .22s ease}
+@keyframes mIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
+.mhd{padding:20px 24px 0;display:flex;align-items:center;justify-content:space-between}
+.mtitle{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700}
+.mclose{background:var(--sand);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:.95rem;display:flex;align-items:center;justify-content:center;transition:background .2s;flex-shrink:0}
+.mclose:hover{background:#ddd}
+.mbody{padding:16px 24px 24px}
+
+/* TABS */
+.tabbar{display:flex;gap:3px;border-bottom:2px solid var(--sand);margin-bottom:16px}
+.tabbtn{padding:7px 15px;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.84rem;font-weight:500;color:#aaa;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .18s}
+.tabbtn.active{color:var(--ocean);border-bottom-color:var(--ocean)}
+.tabpane{display:none}.tabpane.active{display:block}
+
+/* FORM */
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.fr.s{grid-template-columns:1fr}.fr.t{grid-template-columns:1fr 1fr 1fr}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fl{font-size:.73rem;text-transform:uppercase;letter-spacing:.5px;font-weight:500;color:#777}
+.fi{padding:8px 11px;border:2px solid var(--sand);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.9rem;transition:border-color .2s;background:#fff;width:100%}
+.fi:focus{outline:none;border-color:var(--ocean)}
+textarea.fi{resize:vertical;min-height:68px}
+select.fi{cursor:pointer}
+
+/* Autocomplete */
+.acw{position:relative}
+.aclist{position:absolute;top:100%;left:0;right:0;background:#fff;border:2px solid var(--ocean);border-top:none;border-radius:0 0 8px 8px;z-index:50;max-height:170px;overflow-y:auto;box-shadow:var(--sh)}
+.acitem{padding:8px 11px;cursor:pointer;font-size:.9rem;transition:background .12s;display:flex;align-items:center;gap:7px}
+.acitem:hover{background:var(--sand2)}
+.acic{font-size:.78rem;color:#ccc}
+
+/* Color */
+.crow{display:flex;gap:8px;flex-wrap:wrap;margin-top:3px}
+.sw{width:24px;height:24px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:transform .15s,border-color .15s}
+.sw:hover{transform:scale(1.15)}.sw.sel{border-color:var(--ink);transform:scale(1.1)}
+
+/* Status selector */
+.srow{display:flex;gap:7px;margin-top:3px;flex-wrap:wrap}
+.sopt{padding:5px 13px;border-radius:20px;border:2px solid transparent;cursor:pointer;font-size:.8rem;font-weight:500;transition:all .18s;opacity:.5}
+.sopt.sel{opacity:1}
+.sopt.op{background:var(--s-plan-bg);border-color:var(--s-plan-bd);color:var(--s-plan-tx)}
+.sopt.oc{background:var(--s-confirm-bg);border-color:var(--s-confirm-bd);color:var(--s-confirm-tx)}
+.sopt.ox{background:var(--s-cancel-bg);border-color:var(--s-cancel-bd);color:var(--s-cancel-tx)}
+
+/* Form actions */
+.factions{display:flex;gap:9px;justify-content:flex-end;margin-top:16px;padding-top:13px;border-top:1px solid var(--sand)}
+.bcanc{padding:8px 16px;border:2px solid var(--sand);background:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.86rem;transition:background .2s}
+.bcanc:hover{background:var(--sand)}
+.bsave{padding:8px 20px;background:var(--ocean);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.86rem;font-weight:500;transition:background .2s}
+.bsave:hover{background:#1e5270}
+.bdel{padding:8px 13px;background:none;color:#c0392b;border:2px solid #e8b4af;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.86rem;transition:all .2s;margin-right:auto}
+.bdel:hover{background:#fdecea;border-color:#c0392b}
+
+/* Transport */
+.tlist{display:flex;flex-direction:column;gap:9px;margin-bottom:12px}
+.tcard{background:var(--sand2);border-radius:10px;padding:11px 13px;display:flex;align-items:flex-start;gap:9px}
+.tic{font-size:1.25rem;flex-shrink:0;margin-top:2px}
+.tinfo{flex:1;min-width:0}
+.troute{font-weight:500;font-size:.88rem}
+.tmeta{font-size:.76rem;color:#888;margin-top:2px}
+.tacts{display:flex;gap:5px;flex-shrink:0}
+.bic{background:none;border:none;cursor:pointer;font-size:.82rem;padding:3px 5px;border-radius:6px;transition:background .15s;color:#999}
+.bic:hover{background:var(--sand);color:var(--ink)}
+.batr{width:100%;padding:8px;border:2px dashed var(--sand);border-radius:10px;background:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.83rem;color:#bbb;transition:all .2s}
+.batr:hover{border-color:var(--ocean);color:var(--ocean);background:#f0f7fb}
+.tform{display:none;margin-top:12px;background:var(--sand2);border-radius:10px;padding:13px}
+
+/* Detail */
+.ddest{font-family:'Playfair Display',serif;font-size:1.45rem;font-weight:900}
+.ddates{color:#888;font-size:.86rem;margin:4px 0 13px}
+.dchips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.chip{padding:4px 11px;border-radius:20px;font-size:.76rem;font-weight:500}
+.dsec{margin-top:13px}
+.dstitle{font-size:.7rem;text-transform:uppercase;letter-spacing:.5px;color:#bbb;margin-bottom:5px}
+.dsval{font-size:.88rem;line-height:1.5}
+.tdcard{background:var(--sand2);border-radius:8px;padding:9px 11px;margin-bottom:7px}
+.tdroute{font-weight:500;font-size:.86rem}
+.tdmeta{color:#888;font-size:.76rem;margin-top:2px}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:10px 20px;border-radius:30px;font-size:.86rem;font-weight:500;box-shadow:0 8px 22px rgba(0,0,0,.22);z-index:999;transition:transform .28s cubic-bezier(.34,1.56,.64,1);pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* GROUP PANEL */
+.gpanel{background:#fff;border-radius:var(--r);box-shadow:var(--sh);margin-bottom:18px;overflow:hidden}
+.gpanel-hd{background:var(--ink);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:8px;font-size:.8rem;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.ggroup{border-bottom:1px solid var(--sand)}
+.ggroup:last-child{border-bottom:none}
+.ggroup-hd{padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;cursor:pointer;transition:background .15s}
+.ggroup-hd:hover{background:var(--sand2)}
+.ggroup-name{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;flex:1}
+.ggroup-dates{font-size:.76rem;color:#888}
+.ggroup-alerts{display:flex;gap:6px;flex-wrap:wrap}
+.galert{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:.73rem;font-weight:500;border:1.5px solid}
+.galert-ok{background:#edfaf3;border-color:#3aad6e;color:#1e6b44}
+.galert-warn{background:#fffbea;border-color:#f0c040;color:#92710a}
+.galert-err{background:#fdecea;border-color:#c0392b;color:#922b21}
+.ggroup-stays{padding:0 16px 10px 32px;display:flex;flex-direction:column;gap:5px}
+.gstay{display:flex;align-items:center;gap:8px;font-size:.84rem;padding:4px 0;border-bottom:1px dashed var(--sand)}
+.gstay:last-child{border-bottom:none}
+.gstay-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.gstay-name{flex:1;font-weight:500}
+.gstay-dates{font-size:.74rem;color:#aaa}
+.gstay-hotel{font-size:.74rem;color:#aaa;font-style:italic}
+
+/* Alert pill on gantt row */
+.gpill{display:inline-flex;align-items:center;padding:1px 6px;border-radius:10px;font-size:.65rem;font-weight:700;margin-left:3px}
+.gpill-ok{background:#edfaf3;color:#1e6b44}
+.gpill-warn{background:#c0392b;color:#fff;font-size:.75rem}
+.gpill-err{background:#fdecea;color:#922b21}
+
+/* HOTEL SERVICES */
+.hsvc-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.hsvc{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;border:2px solid var(--sand);background:#fff;cursor:pointer;font-size:.8rem;font-weight:500;color:#888;transition:all .18s;user-select:none}
+.hsvc:hover{border-color:#bbb;color:var(--ink)}
+.hsvc.on{border-color:var(--ocean);background:#f0f7fb;color:var(--ocean)}
+.hsvc-icon{font-size:.95rem}
+/* Hotel service chips in detail view */
+.hsvc-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:.75rem;font-weight:500;background:#f0f7fb;border:1.5px solid var(--sky);color:var(--ocean);margin:2px}
+/* Hotel service icons in gantt */
+.ghotel-svc{font-size:.7rem;margin-left:4px;opacity:.7}
+.bud-section{margin-bottom:16px}
+.bud-section-title{font-size:.72rem;text-transform:uppercase;letter-spacing:.6px;color:#aaa;margin-bottom:8px;font-weight:600}
+.bud-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:4px}
+.bud-card{border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.bud-card.bconf{background:var(--s-confirm-bg);border:1.5px solid var(--s-confirm-bd)}
+.bud-card.bestim{background:var(--s-plan-bg);border:1.5px solid var(--s-plan-bd)}
+.bud-lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.4px;font-weight:600}
+.bud-card.bconf .bud-lbl{color:var(--s-confirm-tx)}
+.bud-card.bestim .bud-lbl{color:var(--s-plan-tx)}
+.bud-val{font-family:'DM Sans',sans-serif;font-size:1.3rem;font-weight:700;letter-spacing:-.4px}
+.bud-card.bconf .bud-val{color:var(--s-confirm-tx)}
+.bud-card.bestim .bud-val{color:var(--s-plan-tx)}
+.bud-sub{font-size:.72rem;color:#aaa;margin-top:1px}
+.bud-sep{height:1px;background:var(--sand);margin:14px 0}
+.bud-total-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.bud-total{border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+.bud-total.bconf{background:var(--s-confirm-tx)}
+.bud-total.bestim{background:var(--ink)}
+.bud-total .bud-lbl{color:rgba(255,255,255,.65)}
+.bud-total .bud-val{color:#fff;font-size:1.5rem}
+.bud-total .bud-sub{color:rgba(255,255,255,.45)}
+
+@media(max-width:600px){
+  main{padding:12px}header{padding:11px 13px}.sbar{padding:9px 13px;gap:12px}.fbar{padding:8px 13px}
+  .fr{grid-template-columns:1fr}.fr.t{grid-template-columns:1fr 1fr}.mbody{padding:12px 14px 18px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>✈ Mes <span>Voyages</span><span class="version">v3.4</span></h1>
+  <div class="hr">
+    <div class="vtoggle">
+      <button class="vbtn active" onclick="switchView('timeline')">📅 Timeline</button>
+      <button class="vbtn" onclick="switchView('calendar')">🗓 Calendrier</button>
+    </div>
+    <button class="bio" onclick="exportData()">⬇ Exporter</button>
+    <button class="bio" onclick="document.getElementById('imp').click()">⬆ Importer</button>
+    <input type="file" id="imp" accept=".json" style="display:none" onchange="importData(event)">
+    <button class="badd" onclick="openTripModal()">＋ Ajouter</button>
+  </div>
+</header>
+
+<div class="fbar">
+  <button class="ftab fa" data-f="all" onclick="setFilter('all',this)">Tous</button>
+  <button class="ftab" data-f="plan" onclick="setFilter('plan',this)">? Envisagés</button>
+  <button class="ftab" data-f="confirm" onclick="setFilter('confirm',this)">✓ Confirmés</button>
+  <button class="ftab" data-f="cancel" onclick="setFilter('cancel',this)">✕ Annulés</button>
+</div>
+
+<div class="sbar">
+  <div class="sbar-left tc-all" id="sbar-left">
+    <div class="st"><span class="stv" id="s1">0</span><span class="stl">Voyages</span></div>
+    <div class="st"><span class="stv" id="s2">0</span><span class="stl">Jours</span></div>
+  </div>
+  <div class="sbar-sep"></div>
+  <div class="sbar-right">
+    <div class="st bud-clickable" onclick="openBudgetModal()" title="Détail du budget">
+      <span class="stv" id="s3">—</span><span class="stl">Budget confirmé ›</span>
+    </div>
+    <div class="st bud-clickable" onclick="openBudgetModal()" title="Détail du budget">
+      <span class="stv" id="s4">—</span><span class="stl">Budget estimé ›</span>
+    </div>
+    <div class="st"><span class="stv" id="s5">—</span><span class="stl">Prochain voyage</span></div>
+  </div>
+</div>
+
+<main>
+  <div class="view active" id="vt">
+    <div class="th">
+      <div class="ynav">
+        <button class="nbtn" onclick="changeYear(-1)">‹</button>
+        <div class="ylbl" id="ylbl"></div>
+        <button class="nbtn" onclick="changeYear(1)">›</button>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <div style="display:flex;align-items:center;gap:6px;background:var(--sand2);border-radius:8px;padding:4px 8px;border:1px solid var(--sand)">
+          <button class="nbtn" style="width:26px;height:26px;font-size:.85rem" onclick="shiftMonths(-1)" title="Mois précédent">‹</button>
+          <span style="font-size:.75rem;color:#aaa">glisser</span>
+          <button class="nbtn" style="width:26px;height:26px;font-size:.85rem" onclick="shiftMonths(1)" title="Mois suivant">›</button>
+        </div>
+        <button id="btn-ctrl" onclick="toggleCtrlPanel()" style="padding:7px 14px;border-radius:8px;border:2px solid var(--sand);background:var(--sand2);color:var(--ink);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:500;transition:all .2s">🔍 Contrôle</button>
+      </div>
+    </div>
+    <div class="gwrap"><div class="gscroll" id="gscroll"><div id="gantt"></div></div></div>
+  </div>
+
+  <div class="view" id="vc">
+    <div class="ch">
+      <div class="cnav">
+        <button class="nbtn" onclick="changeMonth(-1)">‹</button>
+        <div class="ctitle" id="ctitle"></div>
+        <button class="nbtn" onclick="changeMonth(1)">›</button>
+      </div>
+    </div>
+    <div class="cgrid">
+      <div class="cdh">
+        <div class="cdn">Lun</div><div class="cdn">Mar</div><div class="cdn">Mer</div>
+        <div class="cdn">Jeu</div><div class="cdn">Ven</div><div class="cdn">Sam</div><div class="cdn">Dim</div>
+      </div>
+      <div class="cbody" id="cbody"></div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<!-- ══ TRIP MODAL ══════════════════════════════════════════════ -->
+<div class="overlay" id="mtrip">
+<div class="modal">
+  <div class="mhd">
+    <div class="mtitle" id="mtrip-title">Nouveau voyage</div>
+    <button class="mclose" onclick="closeModal('mtrip')">✕</button>
+  </div>
+  <div class="mbody">
+    <div class="tabbar">
+      <button class="tabbtn active" data-tab="ti">🏖 Séjour</button>
+      <button class="tabbtn" data-tab="tt">🚆 Transports</button>
+    </div>
+
+    <div class="tabpane active" id="ti">
+      <div class="fr s">
+        <div class="fg">
+          <label class="fl">🌍 Destination *</label>
+          <div class="acw">
+            <input class="fi" id="fd" placeholder="Paris, Tokyo…" autocomplete="off"
+              oninput="showAC(this.value)" onblur="hideAC()" onfocus="showAC(this.value)">
+            <div class="aclist" id="acl" style="display:none"></div>
+          </div>
+        </div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label class="fl">📅 Début *</label><input class="fi" id="fst" type="date"></div>
+        <div class="fg"><label class="fl">📅 Fin *</label><input class="fi" id="fen" type="date"></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label class="fl">🏨 Hébergement</label>
+          <div class="acw">
+            <input class="fi" id="fho" placeholder="Hôtel, Airbnb…" autocomplete="off"
+              oninput="showACH(this.value)" onblur="hideACH()" onfocus="showACH(this.value)">
+            <div class="aclist" id="aclh" style="display:none"></div>
+          </div>
+        </div>
+        <div class="fg"><label class="fl">💰 Budget héberg. (€)</label><input class="fi" id="fbu" type="number" placeholder="0"></div>
+      </div>
+      <div class="fr s">
+        <div class="fg">
+          <label class="fl">🛎 Services hébergement</label>
+          <div class="hsvc-row" id="fhsvc"></div>
+        </div>
+      </div>
+      <div class="fr s">
+        <div class="fg"><label class="fl">📌 Notes hébergement</label><input class="fi" id="fhno" placeholder="Numéro de réservation, code wifi…"></div>
+      </div>
+      <div class="fr s">
+        <div class="fg"><label class="fl">🗺 Activités / étapes</label><textarea class="fi" id="fac" placeholder="Visite du Louvre…"></textarea></div>
+      </div>
+      <div class="fr s">
+        <div class="fg"><label class="fl">📝 Notes</label><textarea class="fi" id="fno" placeholder="Infos pratiques…"></textarea></div>
+      </div>
+      <div class="fr">
+        <div class="fg">
+          <label class="fl">📊 Statut du voyage</label>
+          <div class="srow" id="tsr">
+            <div class="sopt op sel" data-v="plan" onclick="selTripSt('plan')">? Envisagé</div>
+            <div class="sopt oc" data-v="confirm" onclick="selTripSt('confirm')">✓ Confirmé</div>
+            <div class="sopt ox" data-v="cancel" onclick="selTripSt('cancel')">✕ Annulé</div>
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fl">🎨 Couleur</label>
+          <div class="crow" id="cpick"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabpane" id="tt">
+      <div class="tlist" id="tlist"></div>
+      <button class="batr" onclick="openTF()">＋ Ajouter un trajet</button>
+      <div class="tform" id="tform">
+        <div style="font-weight:500;font-size:.86rem;margin-bottom:11px" id="tftitle">Nouveau trajet</div>
+        <div class="fr">
+          <div class="fg"><label class="fl">Type</label>
+            <select class="fi" id="tft">
+              <option value="avion">✈ Avion</option><option value="train">🚆 Train</option>
+              <option value="voiture">🚗 Voiture</option><option value="ferry">⛴ Ferry</option>
+              <option value="bus">🚌 Bus</option><option value="autre">🔵 Autre</option>
+            </select></div>
+          <div class="fg"><label class="fl">Compagnie / Moyen</label><input class="fi" id="tfc" placeholder="Air France, SNCF…"></div>
+        </div>
+        <div class="fr">
+          <div class="fg"><label class="fl">Départ (ville/gare)</label><input class="fi" id="tff" placeholder="Paris CDG"></div>
+          <div class="fg"><label class="fl">Arrivée (ville/gare)</label><input class="fi" id="tfto" placeholder="Tokyo NRT"></div>
+        </div>
+        <div class="fr">
+          <div class="fg"><label class="fl">Date & heure départ</label><input class="fi" id="tfdp" type="datetime-local"></div>
+          <div class="fg"><label class="fl">Date & heure arrivée</label><input class="fi" id="tfar" type="datetime-local"></div>
+        </div>
+        <div class="fr">
+          <div class="fg"><label class="fl">N° vol / train / résa</label><input class="fi" id="tfrf" placeholder="AF0074"></div>
+          <div class="fg"><label class="fl">Coût (€)</label><input class="fi" id="tfco" type="number" placeholder="0"></div>
+        </div>
+        <div class="fr s">
+          <div class="fg"><label class="fl">Statut</label>
+            <div class="srow" id="tfsr">
+              <div class="sopt op sel" data-v="plan" onclick="selTfSt('plan')">? Envisagé</div>
+              <div class="sopt oc" data-v="confirm" onclick="selTfSt('confirm')">✓ Confirmé</div>
+              <div class="sopt ox" data-v="cancel" onclick="selTfSt('cancel')">✕ Annulé</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:9px">
+          <button class="bcanc" onclick="cancelTF()">Annuler</button>
+          <button class="bsave" onclick="saveTF()">Ajouter</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="factions">
+      <button class="bdel" id="bdel" onclick="deleteTrip()" style="display:none">🗑 Supprimer</button>
+      <button class="bcanc" onclick="closeModal('mtrip')">Annuler</button>
+      <button class="bsave" onclick="saveTrip()">Enregistrer le voyage</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ DETAIL MODAL ════════════════════════════════════════════ -->
+<div class="overlay" id="mdet">
+<div class="modal" style="max-width:490px">
+  <div class="mhd"><div></div><button class="mclose" onclick="closeModal('mdet')">✕</button></div>
+  <div class="mbody" id="detbody"></div>
+</div>
+</div>
+
+<!-- ══ CONTRÔLE MODAL ══════════════════════════════════════════ -->
+<div class="overlay" id="mctrl">
+<div class="modal" style="max-width:560px">
+  <div class="mhd">
+    <div class="mtitle">🔍 Contrôle</div>
+    <button class="mclose" onclick="closeModal('mctrl')">✕</button>
+  </div>
+  <div class="mbody" id="gpanel-wrap"></div>
+</div>
+</div>
+
+<!-- ══ BUDGET MODAL ════════════════════════════════════════════ -->
+<div class="overlay" id="mbudget">
+<div class="modal" style="max-width:460px">
+  <div class="mhd">
+    <div class="mtitle">💰 Détail du budget</div>
+    <button class="mclose" onclick="closeModal('mbudget')">✕</button>
+  </div>
+  <div class="mbody" id="budget-body"></div>
+</div>
+</div>
+
+<script>
+// ── CONSTANTS ─────────────────────────────────────────────────
+const COLORS=['#2e6b8a','#4a7c59','#c17f5a','#8a6fa0','#d4a843','#e8845a','#5b8dd9','#c05a7a'];
+const TICONS={avion:'✈',train:'🚆',voiture:'🚗',ferry:'⛴',bus:'🚌',autre:'🔵'};
+const HOTEL_SVCS=[
+  {key:'luggage',  icon:'🧳', label:'Bagagerie'},
+  {key:'breakfast',icon:'🥐', label:'Petit-déj.'},
+  {key:'parking',  icon:'🅿️', label:'Parking'},
+  {key:'terrace',  icon:'🌿', label:'Terrasse/Balcon'},
+];
+const MF=['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Août','Sep','Oct','Nov','Déc'];
+const MFL=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+// ── STATE ─────────────────────────────────────────────────────
+let trips=JSON.parse(localStorage.getItem('mv-trips')||'[]');
+let dests=JSON.parse(localStorage.getItem('mv-dests')||'[]');
+let hotels=JSON.parse(localStorage.getItem('mv-hotels')||'[]');
+let filter='all', view='timeline';
+let cy=new Date().getFullYear(), cm=new Date().getMonth();
+let eid=null, scol=COLORS[0], stSt='plan', ctr=[], etIdx=null, tfSt='plan';
+
+function save(){
+  localStorage.setItem('mv-trips',JSON.stringify(trips));
+  dests=[...new Set(trips.map(t=>t.destination).filter(Boolean))].sort();
+  localStorage.setItem('mv-dests',JSON.stringify(dests));
+  hotels=[...new Set(trips.map(t=>t.hotel).filter(Boolean))].sort();
+  localStorage.setItem('mv-hotels',JSON.stringify(hotels));
+}
+function gid(){return Date.now().toString(36)+Math.random().toString(36).slice(2)}
+
+// ── STATS ─────────────────────────────────────────────────────
+function stats(){
+  const vis=ft();
+  document.getElementById('s1').textContent=vis.length;
+  const j=vis.reduce((s,t)=>{const d=Math.round((new Date(t.end)-new Date(t.start))/86400000)+1;return s+(d>0?d:0)},0);
+  document.getElementById('s2').textContent=j;
+  const bc=trips.filter(t=>t.status==='confirm').reduce((s,t)=>{
+    return s+(parseFloat(t.budget)||0)+(t.transports||[]).filter(x=>x.status==='confirm').reduce((a,x)=>a+(parseFloat(x.cost)||0),0);
+  },0);
+  const be=trips.filter(t=>t.status!=='cancel').reduce((s,t)=>{
+    return s+(parseFloat(t.budget)||0)+(t.transports||[]).filter(x=>x.status!=='cancel').reduce((a,x)=>a+(parseFloat(x.cost)||0),0);
+  },0);
+  document.getElementById('s3').textContent=bc>0?bc.toLocaleString('fr-FR')+' €':'—';
+  document.getElementById('s4').textContent=be>0?be.toLocaleString('fr-FR')+' €':'—';
+  const now=new Date();
+  const nx=trips.filter(t=>t.status!=='cancel'&&new Date(t.start)>=now).sort((a,b)=>new Date(a.start)-new Date(b.start))[0];
+  document.getElementById('s5').textContent=nx?(nx.destination+(nx.hotel?' · '+nx.hotel:'')):'—';
+}
+
+function ft(){return filter==='all'?trips:trips.filter(t=>t.status===filter)}
+
+// ── BUDGET MODAL ──────────────────────────────────────────────
+function openBudgetModal(){
+  const fmt=v=>v>0?v.toLocaleString('fr-FR')+' €':'—';
+
+  // Hébergement confirmed & estimated
+  const hconf=trips.filter(t=>t.status==='confirm').reduce((s,t)=>s+(parseFloat(t.budget)||0),0);
+  const hestim=trips.filter(t=>t.status!=='cancel').reduce((s,t)=>s+(parseFloat(t.budget)||0),0);
+
+  // Transport confirmed & estimated
+  const tconf=trips.reduce((s,t)=>{
+    return s+(t.transports||[]).filter(x=>x.status==='confirm').reduce((a,x)=>a+(parseFloat(x.cost)||0),0);
+  },0);
+  const testim=trips.reduce((s,t)=>{
+    return s+(t.transports||[]).filter(x=>x.status!=='cancel').reduce((a,x)=>a+(parseFloat(x.cost)||0),0);
+  },0);
+
+  // Totals
+  const totconf=hconf+tconf;
+  const totestim=hestim+testim;
+
+  // Per-trip breakdown for confirmed
+  const tripRows=trips.filter(t=>t.status!=='cancel').map(t=>{
+    const th=parseFloat(t.budget)||0;
+    const tt=(t.transports||[]).filter(x=>x.status!=='cancel').reduce((a,x)=>a+(parseFloat(x.cost)||0),0);
+    const tot=th+tt;
+    if(!tot) return '';
+    const isConf=t.status==='confirm';
+    return`<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--sand);font-size:.86rem">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:8px;height:8px;border-radius:50%;background:${t.color||COLORS[0]};flex-shrink:0"></div>
+        <span style="font-weight:500">${t.destination}</span>
+        <span style="font-size:.72rem;color:#aaa">${isConf?'✓ Confirmé':'? Envisagé'}</span>
+      </div>
+      <div style="text-align:right">
+        <span style="font-weight:600;font-family:'DM Sans',sans-serif">${fmt(tot)}</span>
+        ${th&&tt?`<div style="font-size:.7rem;color:#aaa">🏨 ${fmt(th)} · ✈ ${fmt(tt)}</div>`:''}
+      </div>
+    </div>`;
+  }).filter(Boolean).join('');
+
+  document.getElementById('budget-body').innerHTML=`
+    <div class="bud-section">
+      <div class="bud-section-title">🏨 Hébergement</div>
+      <div class="bud-grid">
+        <div class="bud-card bconf"><div class="bud-lbl">✓ Confirmé</div><div class="bud-val">${fmt(hconf)}</div></div>
+        <div class="bud-card bestim"><div class="bud-lbl">? Estimé</div><div class="bud-val">${fmt(hestim)}</div></div>
+      </div>
+    </div>
+    <div class="bud-section">
+      <div class="bud-section-title">✈ Transports</div>
+      <div class="bud-grid">
+        <div class="bud-card bconf"><div class="bud-lbl">✓ Confirmé</div><div class="bud-val">${fmt(tconf)}</div></div>
+        <div class="bud-card bestim"><div class="bud-lbl">? Estimé</div><div class="bud-val">${fmt(testim)}</div></div>
+      </div>
+    </div>
+    <div class="bud-sep"></div>
+    <div class="bud-section">
+      <div class="bud-section-title">Σ Total</div>
+      <div class="bud-total-grid">
+        <div class="bud-total bconf"><div class="bud-lbl">✓ Confirmé</div><div class="bud-val">${fmt(totconf)}</div><div class="bud-sub">héberg. + transports confirmés</div></div>
+        <div class="bud-total bestim"><div class="bud-lbl">? Estimé</div><div class="bud-val">${fmt(totestim)}</div><div class="bud-sub">tous (hors annulés)</div></div>
+      </div>
+    </div>
+    ${tripRows?`<div class="bud-sep"></div>
+    <div class="bud-section">
+      <div class="bud-section-title">Détail par voyage</div>
+      ${tripRows}
+    </div>`:''}`;
+
+  document.getElementById('mbudget').classList.add('open');
+}
+
+// ── THEME ──────────────────────────────────────────────────────
+// Per-filter theme: [bg, text-color, separator-color]
+const THEMES={
+  all:  {bg:'#1a1a2e', tx:'rgba(255,255,255,.88)', sep:'rgba(255,255,255,.12)'},
+  plan: {bg:'#fffbea', tx:'#92710a',               sep:'rgba(146,113,10,.2)'},
+  confirm:{bg:'#edfaf3', tx:'#1e6b44',             sep:'rgba(30,107,68,.2)'},
+  cancel: {bg:'#fdecea', tx:'#922b21',             sep:'rgba(146,43,33,.2)'}
+};
+
+function applyTheme(f){
+  const t=THEMES[f]||THEMES.all;
+  const root=document.documentElement;
+  root.style.setProperty('--theme-bg', t.bg);
+  root.style.setProperty('--theme-tx', t.tx);
+  root.style.setProperty('--theme-sep', t.sep);
+  // gh-label sticky cell must match header bg
+  document.querySelectorAll('.gh-label').forEach(el=>{el.style.background=t.bg;el.style.color=t.tx;});
+  // sbar-left: swap color class
+  const sl=document.getElementById('sbar-left');
+  sl.className='sbar-left tc-'+f;
+  // sbar background never changes
+  document.querySelector('.sbar').className='sbar';
+}
+
+// ── FILTER ────────────────────────────────────────────────────
+function setFilter(f,btn){
+  filter=f;
+  document.querySelectorAll('.ftab').forEach(b=>{
+    b.className='ftab';
+    if(b===btn) b.classList.add(f==='all'?'fa':f==='plan'?'fp':f==='confirm'?'fc':'fx');
+  });
+  applyTheme(f);
+  stats(); render();
+}
+
+// ── VIEWS ─────────────────────────────────────────────────────
+function switchView(v){
+  view=v;
+  document.querySelectorAll('.vbtn').forEach((b,i)=>b.classList.toggle('active',(i===0&&v==='timeline')||(i===1&&v==='calendar')));
+  document.getElementById('vt').classList.toggle('active',v==='timeline');
+  document.getElementById('vc').classList.toggle('active',v==='calendar');
+  render();
+}
+function render(){view==='timeline'?renderGantt():renderCal()}
+
+// ── GROUP ENGINE ──────────────────────────────────────────────
+// Two stays belong to the same group if their date ranges touch or overlap
+// (exact handover end==start, or overlap of 1 day, or overlap >1 day).
+// Groups are built by BFS chaining. Alerts check missing transports and overlaps > 1 day.
+function computeGroups(allTrips){
+  // Work only on non-cancelled trips
+  const active=allTrips.filter(t=>t.status!=='cancel');
+  const used=new Set();
+  const groups=[];
+
+  // Two stays are linked if they touch OR overlap (end >= other's start AND start <= other's end)
+  function areLinked(a,b){
+    const aStart=new Date(a.start), aEnd=new Date(a.end);
+    const bStart=new Date(b.start), bEnd=new Date(b.end);
+    // Overlap or touch: intervals intersect when aStart <= bEnd AND aEnd >= bStart
+    return aStart<=bEnd && aEnd>=bStart;
+  }
+
+  active.forEach(seed=>{
+    if(used.has(seed.id))return;
+    // BFS to find all connected stays
+    const group=[seed];
+    used.add(seed.id);
+    let changed=true;
+    while(changed){
+      changed=false;
+      active.forEach(t=>{
+        if(used.has(t.id))return;
+        const linked=group.some(g=>areLinked(g,t));
+        if(linked){group.push(t);used.add(t.id);changed=true;}
+      });
+    }
+    group.sort((a,b)=>new Date(a.start)-new Date(b.start));
+    groups.push({stays:group, alerts:checkGroup(group)});
+  });
+
+  return groups.sort((a,b)=>new Date(a.stays[0].start)-new Date(b.stays[0].start));
+}
+
+function checkGroup(stays){
+  const alerts=[];
+  const first=stays[0], last=stays[stays.length-1];
+
+  // 1. Transport at start: any confirmed transport departing on first.start day
+  const hasStart=stays.some(t=>(t.transports||[]).some(tr=>
+    tr.status==='confirm' && tr.dep && tr.dep.slice(0,10)===first.start
+  ));
+  if(!hasStart) alerts.push({type:'err',msg:'Transport de début manquant ou non confirmé'});
+
+  // 2. Transport at end: any confirmed transport arriving on last.end day
+  const hasEnd=stays.some(t=>(t.transports||[]).some(tr=>
+    tr.status==='confirm' && tr.arr && tr.arr.slice(0,10)===last.end
+  ));
+  if(!hasEnd) alerts.push({type:'err',msg:'Transport de fin manquant ou non confirmé'});
+
+  // 3. Overlap >= 1 day between any pair (only end==start is normal, i.e. overlapDays==0)
+  for(let i=0;i<stays.length;i++){
+    for(let j=i+1;j<stays.length;j++){
+      const a=stays[i], b=stays[j];
+      const overlapDays=Math.round(
+        (Math.min(new Date(a.end),new Date(b.end)) - Math.max(new Date(a.start),new Date(b.start)))
+        / 86400000
+      );
+      if(overlapDays>=1){
+        alerts.push({type:'warn',msg:`Chevauchement de ${overlapDays} jour${overlapDays>1?'s':''} : ${a.destination} et ${b.destination}`});
+      }
+    }
+  }
+
+  if(!alerts.length) alerts.push({type:'ok',msg:'Transports OK · Pas de chevauchement'});
+  return alerts;
+}
+
+// Returns worst alert level for a trip id across all groups
+function alertLevelForTrip(id, groups){
+  for(const g of groups){
+    if(g.stays.some(s=>s.id===id)){
+      if(g.alerts.some(a=>a.type==='err')) return 'err';
+      if(g.alerts.some(a=>a.type==='warn')) return 'warn';
+      return 'ok';
+    }
+  }
+  return null;
+}
+
+// Check a solo stay: needs at least one confirmed transport
+function checkSolo(t){
+  const hasConfirmed=(t.transports||[]).some(tr=>tr.status==='confirm');
+  if(!hasConfirmed) return 'err';
+  return 'ok';
+}
+
+// ── GANTT ─────────────────────────────────────────────────────
+let monthOffset=new Date().getMonth();
+
+function changeYear(d){
+  cy+=d;
+  document.getElementById('ylbl').textContent=cy;
+  if(cy===new Date().getFullYear()) monthOffset=new Date().getMonth();
+  else monthOffset=0;
+  renderGantt();
+}
+
+function shiftMonths(d){
+  const mcw=getMonthColWidth();
+  const sc=document.getElementById('gscroll');
+  if(sc) sc.scrollLeft+=d*mcw;
+}
+
+function getMonthColWidth(){
+  // Available width for months = gwrap width - label col (160px)
+  const wrap=document.querySelector('.gwrap');
+  if(!wrap) return 80;
+  const avail=wrap.clientWidth-210;
+  return Math.floor(avail/6); // exactly 6 columns visible
+}
+
+function renderGantt(){
+  const allFiltered=ft();
+  const list=allFiltered.filter(t=>{
+    const s=new Date(t.start),e=new Date(t.end);
+    return s.getFullYear()<=cy&&e.getFullYear()>=cy;
+  }).sort((a,b)=>new Date(a.start)-new Date(b.start));
+
+  // Compute groups + alert map
+  const groups=computeGroups(trips.filter(t=>t.status!=='cancel'));
+  const alertMap={};
+  groups.forEach(g=>{
+    if(g.stays.length>=2){
+      const lvl=g.alerts.some(a=>a.type==='err')?'err':g.alerts.some(a=>a.type==='warn')?'warn':'ok';
+      g.stays.forEach(s=>{alertMap[s.id]=lvl;});
+    } else {
+      const s=g.stays[0];
+      if(s.status!=='cancel') alertMap[s.id]=checkSolo(s);
+    }
+  });
+
+  const mcw=getMonthColWidth();
+  const total=leap(cy)?366:365;
+  const now=new Date();
+  const isCY=cy===now.getFullYear();
+  const curMonth=now.getMonth();
+
+  // Set CSS variable for column width
+  document.querySelector('.gwrap').style.setProperty('--mcw', mcw+'px');
+
+  // Header months
+  const headMons=MF.map((m,i)=>
+    `<div class="gh-mon${isCY&&i===curMonth?' cur':''}">${m}</div>`
+  ).join('');
+
+  // Rows
+  let rows='';
+  if(!list.length){
+    rows=`<div class="gempty">🌴 Aucun séjour en ${cy}${filter!=='all'?' (filtre actif)':''}.</div>`;
+  } else {
+    list.forEach(t=>{
+      const days=diy(t.start,t.end,cy);
+      // Bar: left in px from start of 12-col area, width in px
+      const leftPx=Math.round((days.s/total)*12*mcw);
+      const widthPx=Math.max(Math.round((days.c/total)*12*mcw), 8);
+      const dur=Math.round((new Date(t.end)-new Date(t.start))/86400000)+1;
+      const bc=`gbar ${t.status==='plan'?'sp':t.status==='cancel'?'sx':''}`;
+      const col=t.status==='cancel'?'#bbb':(t.color||COLORS[0]);
+      const lvl=alertMap[t.id];
+      const pill=lvl?`<span class="gpill gpill-${lvl}">${lvl==='ok'?'✓':lvl==='warn'?'⚠':'✕'}</span>`:'';
+
+      const cols=Array(12).fill(0).map((_,i)=>
+        `<div class="gcol${isCY&&i===curMonth?' cur':''}"></div>`
+      ).join('');
+
+      rows+=`<div class="gantt-row" onclick="openDetail('${t.id}')">
+        <div class="ginfo">
+          <div class="gdest">${t.destination}${pill}</div>
+          ${t.hotel?`<div class="ghotel">🏨 ${t.hotel}${(t.hotelSvcs||[]).map(k=>{const s=HOTEL_SVCS.find(x=>x.key===k);return s?`<span class="ghotel-svc">${s.icon}</span>`:''}).join('')}</div>`:''}
+          <div class="gmeta">${badge(t.status)}<span class="gdur">${dur}j</span></div>
+        </div>
+        <div class="gcols">
+          ${cols}
+          <div class="gbar-track">
+            <div class="${bc}" style="left:${leftPx}px;width:${widthPx}px;background:${col}" title="${t.destination}">
+              ${dur>=10?t.destination:''}
+            </div>
+          </div>
+        </div>
+      </div>`;
+    });
+  }
+
+  document.getElementById('gantt').innerHTML=`
+    <div class="gtable">
+      <div class="gantt-head">
+        <div class="gh-label">Séjour</div>
+        ${headMons}
+      </div>
+      ${rows}
+    </div>`;
+
+  // Scroll to current month (show it as 2nd column for context)
+  const sc=document.getElementById('gscroll');
+  if(sc){
+    const targetScroll=Math.max(0,(monthOffset-0.5)*mcw);
+    sc.scrollLeft=targetScroll;
+    initDrag(sc);
+  }
+
+  renderGroupPanel(groups, cy);
+}
+
+// ── DRAG TO SCROLL ─────────────────────────────────────────────
+function initDrag(el){
+  // Prevent double-binding
+  if(el._dragInit) return;
+  el._dragInit=true;
+
+  let isDown=false, startX=0, scrollStart=0;
+
+  // Mouse drag
+  el.addEventListener('mousedown',e=>{
+    isDown=true; startX=e.pageX; scrollStart=el.scrollLeft;
+    el.classList.add('dragging');
+  });
+  window.addEventListener('mousemove',e=>{
+    if(!isDown) return;
+    el.scrollLeft=scrollStart-(e.pageX-startX);
+  });
+  window.addEventListener('mouseup',()=>{
+    isDown=false; el.classList.remove('dragging');
+  });
+
+  // Touch drag (already native on mobile, but we sync monthOffset on touchend)
+  el.addEventListener('touchend',()=>{
+    const mcw=getMonthColWidth();
+    if(mcw>0) monthOffset=Math.round(el.scrollLeft/mcw);
+  });
+}
+
+function diy(s,e,y){
+  const ys=new Date(y,0,1),ye=new Date(y,11,31);
+  const st=new Date(Math.max(new Date(s),ys)),en=new Date(Math.min(new Date(e),ye));
+  const doy=d=>{const t=new Date(d.getFullYear(),0,0);return Math.floor((d-t)/86400000)};
+  return{s:doy(st)-1,c:Math.max(0,(en-st)/86400000+1)};
+}
+function leap(y){return(y%4===0&&y%100!==0)||y%400===0}
+
+// ── GROUP PANEL RENDER ────────────────────────────────────────
+
+function toggleCtrlPanel(){
+  document.getElementById('mctrl').classList.add('open');
+}
+
+function renderGroupPanel(groups, year){
+  const wrap=document.getElementById('gpanel-wrap');
+
+  // Build unified list of all items needing attention, visible this year
+  const items=[];
+
+  groups.forEach((g,gi)=>{
+    const inYear=g.stays.some(s=>new Date(s.start).getFullYear()<=year&&new Date(s.end).getFullYear()>=year);
+    if(!inYear) return;
+    if(g.stays.length>=2){
+      // Grouped: always show with their alerts
+      items.push({type:'group', g, gi});
+    } else {
+      // Solo: only show if missing confirmed transport
+      const s=g.stays[0];
+      if(s.status!=='cancel' && checkSolo(s)==='err') items.push({type:'solo', s});
+    }
+  });
+
+  // Filter to only items with at least one non-ok alert
+  const alerts=items.filter(item=>{
+    if(item.type==='group') return item.g.alerts.some(a=>a.type!=='ok');
+    return true; // solo items are already filtered to err only
+  });
+
+  if(!alerts.length){
+    wrap.innerHTML='<div style="padding:20px;text-align:center;color:#bbb;font-style:italic">✓ Aucun problème détecté pour cette année.</div>';
+    return;
+  }
+
+  let h=`<div class="gpanel">
+    <div class="gpanel-hd">⚠ ${alerts.length} voyage${alerts.length>1?'s':''} nécessitant votre attention</div>`;
+
+  alerts.forEach((item,i)=>{
+    if(item.type==='group'){
+      const g=item.g, gi=item.gi;
+      const first=g.stays[0], last=g.stays[g.stays.length-1];
+      const totalDur=Math.round((new Date(last.end)-new Date(first.start))/86400000)+1;
+      const alertsHtml=g.alerts.map(a=>`<span class="galert galert-${a.type}">${a.type==='ok'?'✓':a.type==='warn'?'⚠️':'✕'} ${a.msg}</span>`).join('');
+      h+=`<div class="ggroup">
+        <div class="ggroup-hd" onclick="toggleGroup('gg${gi}')">
+          <div class="ggroup-name">${first.destination}${g.stays.length>2?' → … ':' → '}${last.destination}</div>
+          <span class="ggroup-dates">${fd(first.start)} – ${fd(last.end)} · ${totalDur}j</span>
+          <div class="ggroup-alerts">${alertsHtml}</div>
+        </div>
+        <div class="ggroup-stays" id="gg${gi}">
+          ${g.stays.map(s=>{
+            const dur=Math.round((new Date(s.end)-new Date(s.start))/86400000)+1;
+            return`<div class="gstay" onclick="openDetail('${s.id}')">
+              <div class="gstay-dot" style="background:${s.color||COLORS[0]}"></div>
+              <span class="gstay-name">${s.destination}</span>
+              <span class="gstay-dates">${fd(s.start)} → ${fd(s.end)} (${dur}j)</span>
+              ${s.hotel?`<span class="gstay-hotel">🏨 ${s.hotel}</span>`:''}
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+    } else {
+      const s=item.s;
+      const dur=Math.round((new Date(s.end)-new Date(s.start))/86400000)+1;
+      h+=`<div class="ggroup">
+        <div class="ggroup-hd" onclick="openDetail('${s.id}')">
+          <div class="gstay-dot" style="background:${s.color||COLORS[0]};width:8px;height:8px;border-radius:50%;flex-shrink:0"></div>
+          <div class="ggroup-name" style="font-size:.92rem">${s.destination}</div>
+          <span class="ggroup-dates">${fd(s.start)} – ${fd(s.end)} · ${dur}j</span>
+          <span class="galert galert-err">✕ Aucun transport confirmé</span>
+        </div>
+      </div>`;
+    }
+  });
+
+  h+=`</div>`;
+  wrap.innerHTML=h;
+}
+
+function toggleGroup(id){
+  const el=document.getElementById(id);
+  if(el) el.style.display=el.style.display==='none'?'':'none';
+}
+
+// ── CALENDAR ─────────────────────────────────────────────────
+function changeMonth(d){cm+=d;if(cm>11){cm=0;cy++}if(cm<0){cm=11;cy--}renderCal()}
+
+function renderCal(){
+  document.getElementById('ctitle').textContent=`${MFL[cm]} ${cy}`;
+  const f=new Date(cy,cm,1),l=new Date(cy,cm+1,0);
+  const sdow=(f.getDay()+6)%7,today=new Date();today.setHours(0,0,0,0);
+  let cells=[];
+  for(let i=sdow-1;i>=0;i--)cells.push({d:new Date(cy,cm,-i),o:true});
+  for(let d=1;d<=l.getDate();d++)cells.push({d:new Date(cy,cm,d),o:false});
+  const rem=42-cells.length;
+  for(let i=1;i<=rem;i++)cells.push({d:new Date(cy,cm+1,i),o:true});
+  const list=ft();
+  document.getElementById('cbody').innerHTML=cells.map(c=>{
+    const it=c.d.getTime()===today.getTime();
+    const dt=list.filter(t=>{
+      const s=new Date(t.start);s.setHours(0,0,0,0);
+      const e=new Date(t.end);e.setHours(0,0,0,0);
+      return c.d>=s&&c.d<=e;
+    });
+    const ev=dt.map(t=>`<div class="cev ${t.status==='plan'?'sp':t.status==='cancel'?'sx':''}" style="background:${t.status==='cancel'?'#bbb':(t.color||COLORS[0])}" onclick="event.stopPropagation();openDetail('${t.id}')">${t.destination}</div>`).join('');
+    return`<div class="ccell ${c.o?'om':''} ${it?'td':''}"><div class="cdate">${c.d.getDate()}</div>${ev}</div>`;
+  }).join('');
+}
+
+// ── BADGE ─────────────────────────────────────────────────────
+function badge(s){
+  if(s==='plan')return`<span class="badge bp">? Envisagé</span>`;
+  if(s==='cancel')return`<span class="badge bx">✕ Annulé</span>`;
+  return`<span class="badge bc">✓ Confirmé</span>`;
+}
+
+// ── AUTOCOMPLETE ──────────────────────────────────────────────
+let act=null;
+function showAC(v){
+  clearTimeout(act);
+  const l=document.getElementById('acl'),q=v.trim().toLowerCase();
+  const m=dests.filter(d=>d.toLowerCase().includes(q)&&d.toLowerCase()!==q);
+  if(!m.length){l.style.display='none';return}
+  l.innerHTML=m.map(d=>`<div class="acitem" onmousedown="pickAC('${d.replace(/'/g,"\\'")}')"><span class="acic">🕐</span>${d}</div>`).join('');
+  l.style.display='block';
+}
+function hideAC(){act=setTimeout(()=>{document.getElementById('acl').style.display='none'},200)}
+function pickAC(v){document.getElementById('fd').value=v;document.getElementById('acl').style.display='none'}
+
+let acth=null;
+function showACH(v){
+  clearTimeout(acth);
+  const l=document.getElementById('aclh'),q=v.trim().toLowerCase();
+  const m=hotels.filter(h=>h.toLowerCase().includes(q)&&h.toLowerCase()!==q);
+  if(!m.length){l.style.display='none';return}
+  l.innerHTML=m.map(h=>`<div class="acitem" onmousedown="pickACH('${h.replace(/'/g,"\\'")}')"><span class="acic">🏨</span>${h}</div>`).join('');
+  l.style.display='block';
+}
+function hideACH(){acth=setTimeout(()=>{document.getElementById('aclh').style.display='none'},200)}
+function pickACH(v){document.getElementById('fho').value=v;document.getElementById('aclh').style.display='none'}
+
+// ── TRIP MODAL ────────────────────────────────────────────────
+function openTripModal(id=null){
+  eid=id;
+  document.getElementById('mtrip-title').textContent=id?'Modifier le voyage':'Nouveau voyage';
+  document.getElementById('bdel').style.display=id?'block':'none';
+  // reset tab
+  document.querySelectorAll('.tabbtn').forEach((b,i)=>{b.classList.toggle('active',i===0)});
+  document.querySelectorAll('.tabpane').forEach((p,i)=>{p.classList.toggle('active',i===0)});
+  if(id){
+    const t=trips.find(x=>x.id===id);
+    document.getElementById('fd').value=t.destination;
+    document.getElementById('fst').value=t.start;
+    document.getElementById('fen').value=t.end;
+    document.getElementById('fho').value=t.hotel||'';
+    document.getElementById('fbu').value=t.budget||'';
+    document.getElementById('fac').value=t.activities||'';
+    document.getElementById('fno').value=t.notes||'';
+    document.getElementById('fhno').value=t.hotelNotes||'';
+    scol=t.color||COLORS[0]; stSt=t.status||'plan';
+    ctr=JSON.parse(JSON.stringify(t.transports||[]));
+    buildHotelSvcs(t.hotelSvcs||[]);
+  } else {
+    ['fd','fho','fbu','fac','fno','fhno'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('fst').value=''; document.getElementById('fen').value='';
+    scol=COLORS[0]; stSt='plan'; ctr=[];
+    buildHotelSvcs([]);
+  }
+  buildCP(); renderTSR(); renderTL(); cancelTF();
+  document.getElementById('mtrip').classList.add('open');
+}
+
+function buildHotelSvcs(active){
+  document.getElementById('fhsvc').innerHTML=HOTEL_SVCS.map(s=>
+    `<div class="hsvc ${active.includes(s.key)?'on':''}" data-key="${s.key}" onclick="toggleSvc(this)">
+      <span class="hsvc-icon">${s.icon}</span>${s.label}
+    </div>`
+  ).join('');
+}
+function toggleSvc(el){el.classList.toggle('on')}
+function getHotelSvcs(){
+  return [...document.querySelectorAll('#fhsvc .hsvc.on')].map(el=>el.dataset.key);
+}
+
+function buildCP(){
+  document.getElementById('cpick').innerHTML=COLORS.map(c=>`<div class="sw ${scol===c?'sel':''}" style="background:${c}" onclick="pickC('${c}')"></div>`).join('');
+}
+function pickC(c){scol=c;document.querySelectorAll('.sw').forEach(s=>s.classList.toggle('sel',s.style.background===c||s.style.backgroundColor===c))}
+
+function renderTSR(){document.querySelectorAll('#tsr .sopt').forEach(e=>e.classList.toggle('sel',e.dataset.v===stSt))}
+function selTripSt(v){stSt=v;renderTSR()}
+
+function saveTrip(){
+  const dest=document.getElementById('fd').value.trim();
+  const start=document.getElementById('fst').value;
+  const end=document.getElementById('fen').value;
+  if(!dest||!start||!end){alert('Destination et dates obligatoires.');return}
+  if(new Date(end)<new Date(start)){alert('La date de retour doit être après le départ.');return}
+  const trip={id:eid||gid(),destination:dest,start,end,
+    hotel:document.getElementById('fho').value.trim(),
+    budget:document.getElementById('fbu').value,
+    hotelSvcs:getHotelSvcs(),
+    hotelNotes:document.getElementById('fhno').value.trim(),
+    activities:document.getElementById('fac').value.trim(),
+    notes:document.getElementById('fno').value.trim(),
+    color:scol,status:stSt,transports:ctr};
+  if(eid){const i=trips.findIndex(t=>t.id===eid);trips[i]=trip}else trips.push(trip);
+  save();closeModal('mtrip');stats();render();
+  showToast(eid?'✅ Voyage mis à jour !':'✅ Voyage ajouté !');
+}
+
+function deleteTrip(){
+  if(!confirm('Supprimer ce voyage ?'))return;
+  trips=trips.filter(t=>t.id!==eid);
+  save();closeModal('mtrip');stats();render();showToast('🗑 Voyage supprimé.');
+}
+
+// ── TRANSPORT FORM ────────────────────────────────────────────
+function renderTL(){
+  const l=document.getElementById('tlist');
+  if(!ctr.length){l.innerHTML='<div style="color:#ccc;font-size:.83rem;text-align:center;padding:7px 0">Aucun trajet</div>';return}
+  l.innerHTML=ctr.map((tr,i)=>{
+    const icon=TICONS[tr.type]||'🔵';
+    const dep=tr.dep?fdt(tr.dep):'', arr=tr.arr?fdt(tr.arr):'';
+    const times=dep||arr?`${dep}${dep&&arr?' → ':''}${arr}`:'';
+    const cost=tr.cost?parseFloat(tr.cost).toLocaleString('fr-FR')+' €':'';
+    return`<div class="tcard"><div class="tic">${icon}</div>
+      <div class="tinfo">
+        <div class="troute">${tr.from||'?'} → ${tr.to||'?'}</div>
+        <div class="tmeta">${[tr.company,times,tr.ref,cost].filter(Boolean).join(' · ')}</div>
+        <div style="margin-top:4px">${badge(tr.status||'plan')}</div>
+      </div>
+      <div class="tacts">
+        <button class="bic" onclick="editTF(${i})">✏</button>
+        <button class="bic" onclick="rmTF(${i})">🗑</button>
+      </div></div>`;
+  }).join('');
+}
+
+function openTF(idx=null){
+  etIdx=idx;
+  document.getElementById('tftitle').textContent=idx!==null?'Modifier le trajet':'Nouveau trajet';
+  if(idx!==null){
+    const tr=ctr[idx];
+    document.getElementById('tft').value=tr.type||'avion';
+    document.getElementById('tfc').value=tr.company||'';
+    document.getElementById('tff').value=tr.from||'';
+    document.getElementById('tfto').value=tr.to||'';
+    document.getElementById('tfdp').value=tr.dep||'';
+    document.getElementById('tfar').value=tr.arr||'';
+    document.getElementById('tfrf').value=tr.ref||'';
+    document.getElementById('tfco').value=tr.cost||'';
+    tfSt=tr.status||'plan';
+  } else {
+    ['tfc','tff','tfto','tfdp','tfar','tfrf','tfco'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('tft').value='avion'; tfSt='plan';
+  }
+  renderTFSR();
+  document.getElementById('tform').style.display='block';
+}
+function cancelTF(){document.getElementById('tform').style.display='none';etIdx=null}
+function editTF(i){openTF(i)}
+function rmTF(i){ctr.splice(i,1);renderTL()}
+
+function saveTF(){
+  const from=document.getElementById('tff').value.trim();
+  const to=document.getElementById('tfto').value.trim();
+  if(!from&&!to){alert('Indiquez au moins le départ ou l\'arrivée.');return}
+  const tr={type:document.getElementById('tft').value,company:document.getElementById('tfc').value.trim(),
+    from,to,dep:document.getElementById('tfdp').value,arr:document.getElementById('tfar').value,
+    ref:document.getElementById('tfrf').value.trim(),cost:document.getElementById('tfco').value,status:tfSt};
+  if(etIdx!==null)ctr[etIdx]=tr;else ctr.push(tr);
+  cancelTF();renderTL();
+}
+function renderTFSR(){document.querySelectorAll('#tfsr .sopt').forEach(e=>e.classList.toggle('sel',e.dataset.v===tfSt))}
+function selTfSt(v){tfSt=v;renderTFSR()}
+
+// ── DETAIL MODAL ──────────────────────────────────────────────
+function openDetail(id){
+  const t=trips.find(x=>x.id===id);if(!t)return;
+  const dur=Math.round((new Date(t.end)-new Date(t.start))/86400000)+1;
+  const tc=(t.transports||[]).filter(x=>x.status!=='cancel').reduce((s,x)=>s+(parseFloat(x.cost)||0),0);
+  const tot=(parseFloat(t.budget)||0)+tc;
+  const trHtml=(t.transports||[]).length?`<div class="dsec"><div class="dstitle">Transports (${t.transports.length})</div>
+    ${t.transports.map(tr=>{
+      const dep=tr.dep?fdt(tr.dep):'',arr=tr.arr?fdt(tr.arr):'';
+      return`<div class="tdcard"><div class="tdroute">${TICONS[tr.type]||'🔵'} ${tr.from||'?'} → ${tr.to||'?'}</div>
+        <div class="tdmeta">${[tr.company,dep&&arr?dep+' → '+arr:(dep||arr),tr.ref,tr.cost?parseFloat(tr.cost).toLocaleString('fr-FR')+' €':''].filter(Boolean).join(' · ')}</div>
+        <div style="margin-top:4px">${badge(tr.status||'plan')}</div></div>`;
+    }).join('')}</div>`:'';
+
+  document.getElementById('detbody').innerHTML=`
+    <div class="ddest" style="${t.status==='cancel'?'text-decoration:line-through;opacity:.45':''}">${t.destination}</div>
+    <div class="ddates">${fd(t.start)} → ${fd(t.end)}</div>
+    <div class="dchips">${badge(t.status||'plan')}
+      <div class="chip" style="background:${t.color}22;color:${t.color}">✈ ${dur} jour${dur>1?'s':''}</div>
+      ${t.hotel?`<div class="chip" style="background:#f5f5f5">🏨 ${t.hotel}</div>`:''}
+      ${tot?`<div class="chip" style="background:#fff8e1;color:#b8860b">💰 ${tot.toLocaleString('fr-FR')} €</div>`:''}
+    </div>
+    ${(t.hotelSvcs||[]).length?`<div class="dsec"><div class="dstitle">Services hébergement</div><div style="margin-top:4px">${
+      t.hotelSvcs.map(k=>{const s=HOTEL_SVCS.find(x=>x.key===k);return s?`<span class="hsvc-chip">${s.icon} ${s.label}</span>`:''}).join('')
+    }</div></div>`:''}
+    ${t.hotelNotes?`<div class="dsec"><div class="dstitle">Notes hébergement</div><div class="dsval">${t.hotelNotes}</div></div>`:''}
+    ${t.activities?`<div class="dsec"><div class="dstitle">Activités</div><div class="dsval">${t.activities.replace(/\n/g,'<br>')}</div></div>`:''}
+    ${trHtml}
+    ${t.notes?`<div class="dsec"><div class="dstitle">Notes</div><div class="dsval">${t.notes.replace(/\n/g,'<br>')}</div></div>`:''}
+    <div class="factions">
+      <button class="bcanc" onclick="closeModal('mdet')">Fermer</button>
+      <button class="bsave" onclick="closeModal('mdet');openTripModal('${t.id}')">✏ Modifier</button>
+    </div>`;
+  document.getElementById('mdet').classList.add('open');
+}
+
+// ── TABS ──────────────────────────────────────────────────────
+document.querySelectorAll('.tabbtn').forEach(btn=>{
+  btn.addEventListener('click',function(){
+    const tab=this.dataset.tab;
+    document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tabpane').forEach(p=>p.classList.remove('active'));
+    this.classList.add('active');
+    document.getElementById(tab).classList.add('active');
+  });
+});
+
+// ── MODAL UTILS ───────────────────────────────────────────────
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')}));
+
+// ── EXPORT / IMPORT ───────────────────────────────────────────
+function exportData(){
+  const blob=new Blob([JSON.stringify({version:2,exportedAt:new Date().toISOString(),trips},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`mes-voyages-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);
+  showToast('✅ Données exportées !');
+}
+function importData(e){
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      const data=JSON.parse(ev.target.result);
+      const imp=Array.isArray(data)?data:(data.trips||[]);
+      if(!imp.length){showToast('⚠️ Fichier vide ou invalide.');return}
+      const merge=confirm(`Importer ${imp.length} voyage(s) ?\n\nOK = Fusionner\nAnnuler = Remplacer`);
+      if(merge){const ids=new Set(trips.map(t=>t.id));trips=[...trips,...imp.filter(t=>!ids.has(t.id))]}
+      else trips=imp;
+      save();stats();render();showToast(`✅ ${imp.length} voyage(s) importé(s) !`);
+    }catch{showToast('❌ Erreur de lecture.')}
+    e.target.value='';
+  };r.readAsText(file);
+}
+
+// ── HELPERS ───────────────────────────────────────────────────
+function fd(s){return new Date(s).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'})}
+function fdt(s){if(!s)return'';const d=new Date(s);return d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
+
+// ── INIT ──────────────────────────────────────────────────────
+document.getElementById('ylbl').textContent=cy;
+
+// Migrate old data (v1 → v2: add status + transports)
+if(trips.length&&!trips[0].hasOwnProperty('status')){
+  trips=trips.map(t=>({...t,status:t.status||'confirm',transports:t.transports||[]}));save();
+}
+
+// Sample data if empty
+if(!trips.length){
+  const y=cy;
+  trips=[
+    {id:gid(),destination:'Barcelone',start:`${y}-07-05`,end:`${y}-07-12`,hotel:'Hotel Arts',budget:'800',
+     activities:'Sagrada Família, Parc Güell, La Barceloneta',notes:'Vol direct depuis Paris',color:'#c17f5a',status:'confirm',
+     transports:[{type:'avion',company:'Vueling',from:'Paris ORY',to:'Barcelone BCN',dep:`${y}-07-05T07:30`,arr:`${y}-07-05T09:45`,ref:'VY8361',cost:'180',status:'confirm'}]},
+    {id:gid(),destination:'Toscane',start:`${y}-07-12`,end:`${y}-07-25`,hotel:'Villa Agriturismo',budget:'1500',
+     activities:'Florence, Sienne, vignobles, San Gimignano',notes:'Location voiture recommandée',color:'#4a7c59',status:'confirm',
+     transports:[{type:'train',company:'Trenitalia',from:'Barcelone Sants',to:'Florence SMN',dep:`${y}-07-12T10:00`,arr:`${y}-07-12T17:30`,ref:'RG9590',cost:'120',status:'confirm'},
+                 {type:'avion',company:'Air France',from:'Florence FLR',to:'Paris CDG',dep:`${y}-07-25T16:00`,arr:`${y}-07-25T18:00`,ref:'AF1234',cost:'210',status:'confirm'}]},
+    {id:gid(),destination:'Tokyo',start:`${y}-10-10`,end:`${y}-10-24`,hotel:'',budget:'2000',
+     activities:'Shibuya, temples, Mont Fuji',notes:'Réserver les billets à l\'avance',color:'#5b8dd9',status:'plan',
+     transports:[{type:'avion',company:'Air France',from:'Paris CDG',to:'Tokyo HND',dep:`${y}-10-10T11:00`,arr:`${y}-10-11T07:00`,ref:'AF0274',cost:'950',status:'plan'}]},
+  ];
+  save();
+}
+
+applyTheme('all');
+stats();render();
+
+// ── SERVICE WORKER (PWA offline support) ──────────────────────
+if('serviceWorker' in navigator){
+  // Inline service worker that caches the app for offline use
+  const swCode=`
+    const CACHE='mes-voyages-v1';
+    const ASSETS=['./', './index.html'];
+    self.addEventListener('install', e=>e.waitUntil(
+      caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())
+    ));
+    self.addEventListener('activate', e=>e.waitUntil(
+      caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k))))
+        .then(()=>self.clients.claim())
+    ));
+    self.addEventListener('fetch', e=>e.respondWith(
+      caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match('./index.html')))
+    ));
+  `;
+  const blob=new Blob([swCode],{type:'application/javascript'});
+  const swUrl=URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(()=>{});
+}
+</script>
+</body>
+</html>
