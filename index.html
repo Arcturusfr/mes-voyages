@@ -256,6 +256,31 @@ select.fi{cursor:pointer}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:10px 20px;border-radius:30px;font-size:.86rem;font-weight:500;box-shadow:0 8px 22px rgba(0,0,0,.22);z-index:999;transition:transform .28s cubic-bezier(.34,1.56,.64,1);pointer-events:none}
 .toast.show{transform:translateX(-50%) translateY(0)}
 
+/* VOYAGES MODAL */
+.voy-group{border:1.5px solid var(--sand);border-radius:12px;margin-bottom:16px;overflow:hidden}
+.voy-group-hd{background:var(--ink);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.voy-group-name{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;flex:1}
+.voy-group-dates{font-size:.75rem;color:rgba(255,255,255,.55)}
+.voy-group-dur{font-size:.75rem;color:var(--gold);font-weight:600}
+.voy-transport-row{display:flex;align-items:flex-start;gap:10px;padding:10px 16px;background:#f9f9f9;border-bottom:1px solid var(--sand)}
+.voy-transport-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px}
+.voy-transport-info{flex:1;min-width:0}
+.voy-transport-route{font-weight:500;font-size:.86rem}
+.voy-transport-meta{font-size:.75rem;color:#999;margin-top:2px}
+.voy-stay{padding:12px 16px;border-bottom:1px solid var(--sand);cursor:pointer;transition:background .15s}
+.voy-stay:hover{background:var(--sand2)}
+.voy-stay:last-child{border-bottom:none}
+.voy-stay-hd{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.voy-stay-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.voy-stay-dest{font-weight:600;font-size:.92rem;flex:1}
+.voy-stay-dates{font-size:.75rem;color:#aaa}
+.voy-stay-hotel{font-size:.76rem;color:#888;font-style:italic;margin-top:2px}
+.voy-stay-svcs{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap}
+.voy-stay-svc{font-size:.72rem;background:#f0f7fb;border:1px solid var(--sky);color:var(--ocean);padding:1px 6px;border-radius:10px}
+.voy-divider{display:flex;align-items:center;gap:8px;padding:5px 16px;background:#f5f5f5;border-bottom:1px solid var(--sand)}
+.voy-divider-line{flex:1;height:1px;background:var(--sand)}
+.voy-divider-lbl{font-size:.7rem;color:#bbb;text-transform:uppercase;letter-spacing:.5px}
+
 /* GROUP PANEL */
 .gpanel{background:#fff;border-radius:var(--r);box-shadow:var(--sh);margin-bottom:18px;overflow:hidden}
 .gpanel-hd{background:var(--ink);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:8px;font-size:.8rem;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
@@ -282,7 +307,7 @@ select.fi{cursor:pointer}
 .gpill{display:inline-flex;align-items:center;padding:1px 6px;border-radius:10px;font-size:.65rem;font-weight:700;margin-left:3px}
 .gpill-ok{background:#edfaf3;color:#1e6b44}
 .gpill-warn{background:#c0392b;color:#fff;font-size:.75rem}
-.gpill-err{background:#fdecea;color:#922b21}
+.gpill-err{background:#fdecea;color:#922b21;border:1px solid #c0392b;font-size:.75rem}
 
 /* HOTEL SERVICES */
 .hsvc-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
@@ -325,7 +350,7 @@ select.fi{cursor:pointer}
 <body>
 
 <header>
-  <h1>✈ Mes <span>Voyages</span><span class="version">v3.4</span></h1>
+  <h1>✈ Mes <span>Voyages</span><span class="version">v4.1</span></h1>
   <div class="hr">
     <div class="vtoggle">
       <button class="vbtn active" onclick="switchView('timeline')">📅 Timeline</button>
@@ -377,6 +402,7 @@ select.fi{cursor:pointer}
           <button class="nbtn" style="width:26px;height:26px;font-size:.85rem" onclick="shiftMonths(1)" title="Mois suivant">›</button>
         </div>
         <button id="btn-ctrl" onclick="toggleCtrlPanel()" style="padding:7px 14px;border-radius:8px;border:2px solid var(--sand);background:var(--sand2);color:var(--ink);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:500;transition:all .2s">🔍 Contrôle</button>
+        <button onclick="openVoyagesModal()" style="padding:7px 14px;border-radius:8px;border:2px solid var(--sand);background:var(--sand2);color:var(--ink);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:500;transition:all .2s">✈ Voyages</button>
       </div>
     </div>
     <div class="gwrap"><div class="gscroll" id="gscroll"><div id="gantt"></div></div></div>
@@ -413,6 +439,7 @@ select.fi{cursor:pointer}
     <div class="tabbar">
       <button class="tabbtn active" data-tab="ti">🏖 Séjour</button>
       <button class="tabbtn" data-tab="tt">🚆 Transports</button>
+      <button class="tabbtn" data-tab="tl">🚙 Location</button>
     </div>
 
     <div class="tabpane active" id="ti">
@@ -513,6 +540,37 @@ select.fi{cursor:pointer}
       </div>
     </div>
 
+    <!-- TAB LOCATION -->
+    <div class="tabpane" id="tl">
+      <div class="tlist" id="llist"></div>
+      <button class="batr" onclick="openLF()">＋ Ajouter une location</button>
+      <div class="tform" id="lform">
+        <div style="font-weight:500;font-size:.86rem;margin-bottom:11px" id="lftitle">Nouvelle location</div>
+        <div class="fr s">
+          <div class="fg"><label class="fl">🏢 Agence</label><input class="fi" id="lfa" placeholder="Hertz, Europcar, Avis…"></div>
+        </div>
+        <div class="fr">
+          <div class="fg"><label class="fl">📅 Prise en charge</label><input class="fi" id="lfd" type="datetime-local"></div>
+          <div class="fg"><label class="fl">📅 Restitution</label><input class="fi" id="lfr" type="datetime-local"></div>
+        </div>
+        <div class="fr">
+          <div class="fg"><label class="fl">💰 Coût (€)</label><input class="fi" id="lfc" type="number" placeholder="0"></div>
+          <div class="fg">
+            <label class="fl">Statut</label>
+            <div class="srow" id="lfsr">
+              <div class="sopt op sel" data-v="plan" onclick="selLfSt('plan')">? Envisagé</div>
+              <div class="sopt oc" data-v="confirm" onclick="selLfSt('confirm')">✓ Confirmé</div>
+              <div class="sopt ox" data-v="cancel" onclick="selLfSt('cancel')">✕ Annulé</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:9px">
+          <button class="bcanc" onclick="cancelLF()">Annuler</button>
+          <button class="bsave" onclick="saveLF()">Ajouter</button>
+        </div>
+      </div>
+    </div>
+
     <div class="factions">
       <button class="bdel" id="bdel" onclick="deleteTrip()" style="display:none">🗑 Supprimer</button>
       <button class="bcanc" onclick="closeModal('mtrip')">Annuler</button>
@@ -552,10 +610,21 @@ select.fi{cursor:pointer}
 </div>
 </div>
 
+<!-- ══ VOYAGES MODAL ═══════════════════════════════════════════ -->
+<div class="overlay" id="mvoyages">
+<div class="modal" style="max-width:580px">
+  <div class="mhd">
+    <div class="mtitle">✈ Voyages</div>
+    <button class="mclose" onclick="closeModal('mvoyages')">✕</button>
+  </div>
+  <div class="mbody" id="voyages-body"></div>
+</div>
+</div>
+
 <script>
 // ── CONSTANTS ─────────────────────────────────────────────────
 const COLORS=['#2e6b8a','#4a7c59','#c17f5a','#8a6fa0','#d4a843','#e8845a','#5b8dd9','#c05a7a'];
-const TICONS={avion:'✈',train:'🚆',voiture:'🚗',ferry:'⛴',bus:'🚌',autre:'🔵'};
+const TICONS={avion:'✈',train:'🚆',voiture:'🚗',ferry:'⛴',bus:'🚌',location:'🚙',autre:'🔵'};
 const HOTEL_SVCS=[
   {key:'luggage',  icon:'🧳', label:'Bagagerie'},
   {key:'breakfast',icon:'🥐', label:'Petit-déj.'},
@@ -572,6 +641,7 @@ let hotels=JSON.parse(localStorage.getItem('mv-hotels')||'[]');
 let filter='all', view='timeline';
 let cy=new Date().getFullYear(), cm=new Date().getMonth();
 let eid=null, scol=COLORS[0], stSt='plan', ctr=[], etIdx=null, tfSt='plan';
+let clr=[], elIdx=null, lfSt='plan'; // car rental state
 
 function save(){
   localStorage.setItem('mv-trips',JSON.stringify(trips));
@@ -589,10 +659,12 @@ function stats(){
   const j=vis.reduce((s,t)=>{const d=Math.round((new Date(t.end)-new Date(t.start))/86400000)+1;return s+(d>0?d:0)},0);
   document.getElementById('s2').textContent=j;
   const bc=trips.filter(t=>t.status==='confirm').reduce((s,t)=>{
-    return s+(parseFloat(t.budget)||0)+(t.transports||[]).filter(x=>x.status==='confirm').reduce((a,x)=>a+(parseFloat(x.cost)||0),0);
+    const lr=(t.carRentals||[]).filter(x=>x.status==='confirm').reduce((a,x)=>a+(parseFloat(x.cost)||0),0);
+    return s+(parseFloat(t.budget)||0)+(t.transports||[]).filter(x=>x.status==='confirm').reduce((a,x)=>a+(parseFloat(x.cost)||0),0)+lr;
   },0);
   const be=trips.filter(t=>t.status!=='cancel').reduce((s,t)=>{
-    return s+(parseFloat(t.budget)||0)+(t.transports||[]).filter(x=>x.status!=='cancel').reduce((a,x)=>a+(parseFloat(x.cost)||0),0);
+    const lr=(t.carRentals||[]).filter(x=>x.status!=='cancel').reduce((a,x)=>a+(parseFloat(x.cost)||0),0);
+    return s+(parseFloat(t.budget)||0)+(t.transports||[]).filter(x=>x.status!=='cancel').reduce((a,x)=>a+(parseFloat(x.cost)||0),0)+lr;
   },0);
   document.getElementById('s3').textContent=bc>0?bc.toLocaleString('fr-FR')+' €':'—';
   document.getElementById('s4').textContent=be>0?be.toLocaleString('fr-FR')+' €':'—';
@@ -613,10 +685,14 @@ function openBudgetModal(){
 
   // Transport confirmed & estimated
   const tconf=trips.reduce((s,t)=>{
-    return s+(t.transports||[]).filter(x=>x.status==='confirm').reduce((a,x)=>a+(parseFloat(x.cost)||0),0);
+    const tr=(t.transports||[]).filter(x=>x.status==='confirm').reduce((a,x)=>a+(parseFloat(x.cost)||0),0);
+    const lr=(t.carRentals||[]).filter(x=>x.status==='confirm').reduce((a,x)=>a+(parseFloat(x.cost)||0),0);
+    return s+tr+lr;
   },0);
   const testim=trips.reduce((s,t)=>{
-    return s+(t.transports||[]).filter(x=>x.status!=='cancel').reduce((a,x)=>a+(parseFloat(x.cost)||0),0);
+    const tr=(t.transports||[]).filter(x=>x.status!=='cancel').reduce((a,x)=>a+(parseFloat(x.cost)||0),0);
+    const lr=(t.carRentals||[]).filter(x=>x.status!=='cancel').reduce((a,x)=>a+(parseFloat(x.cost)||0),0);
+    return s+tr+lr;
   },0);
 
   // Totals
@@ -775,12 +851,17 @@ function checkGroup(stays){
   ));
   if(!hasEnd) alerts.push({type:'err',msg:'Transport de fin manquant ou non confirmé'});
 
-  // 3. Overlap >= 1 day between any pair (only end==start is normal, i.e. overlapDays==0)
+  // 3. Overlap: alert unless it's a simple handover (end of A == start of B)
   for(let i=0;i<stays.length;i++){
     for(let j=i+1;j<stays.length;j++){
       const a=stays[i], b=stays[j];
+      // Normal handover: one ends exactly when the other starts → no alert
+      if(a.end===b.start || b.end===a.start) continue;
+      // Treat end dates as inclusive: add 1 day to make them exclusive
+      const aEnd=new Date(a.end); aEnd.setDate(aEnd.getDate()+1);
+      const bEnd=new Date(b.end); bEnd.setDate(bEnd.getDate()+1);
       const overlapDays=Math.round(
-        (Math.min(new Date(a.end),new Date(b.end)) - Math.max(new Date(a.start),new Date(b.start)))
+        (Math.min(aEnd,bEnd) - Math.max(new Date(a.start),new Date(b.start)))
         / 86400000
       );
       if(overlapDays>=1){
@@ -844,16 +925,31 @@ function renderGantt(){
     return s.getFullYear()<=cy&&e.getFullYear()>=cy;
   }).sort((a,b)=>new Date(a.start)-new Date(b.start));
 
-  // Compute groups + alert map
+  // Compute groups + alert map — store {warn, err} independently per trip
   const groups=computeGroups(trips.filter(t=>t.status!=='cancel'));
-  const alertMap={};
+  const alertMap={}; // tripId → {warn:bool, err:bool}
   groups.forEach(g=>{
     if(g.stays.length>=2){
-      const lvl=g.alerts.some(a=>a.type==='err')?'err':g.alerts.some(a=>a.type==='warn')?'warn':'ok';
-      g.stays.forEach(s=>{alertMap[s.id]=lvl;});
+      const hasErr=g.alerts.some(a=>a.type==='err');
+      // err applies to all stays in the group (missing transport = group-level problem)
+      // warn applies only to stays directly involved in an overlap
+      const warnIds=new Set();
+      for(let i=0;i<g.stays.length;i++){
+        for(let j=i+1;j<g.stays.length;j++){
+          const a=g.stays[i], b=g.stays[j];
+          if(a.end===b.start||b.end===a.start) continue;
+          const aEnd=new Date(a.end); aEnd.setDate(aEnd.getDate()+1);
+          const bEnd=new Date(b.end); bEnd.setDate(bEnd.getDate()+1);
+          const ov=Math.round((Math.min(aEnd,bEnd)-Math.max(new Date(a.start),new Date(b.start)))/86400000);
+          if(ov>=1){warnIds.add(a.id);warnIds.add(b.id);}
+        }
+      }
+      g.stays.forEach(s=>{
+        alertMap[s.id]={warn:warnIds.has(s.id), err:hasErr};
+      });
     } else {
       const s=g.stays[0];
-      if(s.status!=='cancel') alertMap[s.id]=checkSolo(s);
+      if(s.status!=='cancel') alertMap[s.id]={warn:false,err:checkSolo(s)==='err'};
     }
   });
 
@@ -884,8 +980,14 @@ function renderGantt(){
       const dur=Math.round((new Date(t.end)-new Date(t.start))/86400000)+1;
       const bc=`gbar ${t.status==='plan'?'sp':t.status==='cancel'?'sx':''}`;
       const col=t.status==='cancel'?'#bbb':(t.color||COLORS[0]);
-      const lvl=alertMap[t.id];
-      const pill=lvl?`<span class="gpill gpill-${lvl}">${lvl==='ok'?'✓':lvl==='warn'?'⚠':'✕'}</span>`:'';
+      const al=alertMap[t.id];
+      let pill='';
+      if(al){
+        if(al.warn&&al.err) pill=`<span class="gpill gpill-warn">⚠</span><span class="gpill gpill-err">✕</span>`;
+        else if(al.warn) pill=`<span class="gpill gpill-warn">⚠</span>`;
+        else if(al.err) pill=`<span class="gpill gpill-err">✕</span>`;
+        else pill=`<span class="gpill gpill-ok">✓</span>`;
+      }
 
       const cols=Array(12).fill(0).map((_,i)=>
         `<div class="gcol${isCY&&i===curMonth?' cur':''}"></div>`
@@ -1058,21 +1160,62 @@ function renderCal(){
   document.getElementById('ctitle').textContent=`${MFL[cm]} ${cy}`;
   const f=new Date(cy,cm,1),l=new Date(cy,cm+1,0);
   const sdow=(f.getDay()+6)%7,today=new Date();today.setHours(0,0,0,0);
+
+  // Build cell dates
   let cells=[];
   for(let i=sdow-1;i>=0;i--)cells.push({d:new Date(cy,cm,-i),o:true});
   for(let d=1;d<=l.getDate();d++)cells.push({d:new Date(cy,cm,d),o:false});
   const rem=42-cells.length;
   for(let i=1;i<=rem;i++)cells.push({d:new Date(cy,cm+1,i),o:true});
+
   const list=ft();
+
+  // ── LANE ASSIGNMENT ──────────────────────────────────────────
+  // Sort stays by start date
+  const sorted=[...list].sort((a,b)=>new Date(a.start)-new Date(b.start));
+
+  // For each stay, find the lowest lane whose last-end <= this stay's start
+  // (a stay ending on the same day as another's start = adjacent, OK for same lane release)
+  const laneEndDate=[]; // laneEndDate[lane] = Date when that lane becomes free
+  const stayLane={};   // tripId → lane index
+
+  sorted.forEach(t=>{
+    const tStart=new Date(t.start); tStart.setHours(0,0,0,0);
+    const tEnd=new Date(t.end);     tEnd.setHours(0,0,0,0);
+    // Find lowest free lane: free means laneEndDate[lane] < tStart
+    // (end == start = shared day → both stays visible that day → NOT free yet)
+    let lane=0;
+    while(laneEndDate[lane] && laneEndDate[lane] >= tStart) lane++;
+    stayLane[t.id]=lane;
+    // Update lane end: this lane is occupied until tEnd
+    laneEndDate[lane]=tEnd;
+  });
+
+  const maxLane=Math.max(0,...Object.values(stayLane));
+
+  // ── RENDER ───────────────────────────────────────────────────
   document.getElementById('cbody').innerHTML=cells.map(c=>{
     const it=c.d.getTime()===today.getTime();
+
+    // Which stays cover this day?
     const dt=list.filter(t=>{
       const s=new Date(t.start);s.setHours(0,0,0,0);
       const e=new Date(t.end);e.setHours(0,0,0,0);
       return c.d>=s&&c.d<=e;
     });
-    const ev=dt.map(t=>`<div class="cev ${t.status==='plan'?'sp':t.status==='cancel'?'sx':''}" style="background:${t.status==='cancel'?'#bbb':(t.color||COLORS[0])}" onclick="event.stopPropagation();openDetail('${t.id}')">${t.destination}</div>`).join('');
-    return`<div class="ccell ${c.o?'om':''} ${it?'td':''}"><div class="cdate">${c.d.getDate()}</div>${ev}</div>`;
+
+    // Build lane slots 0..maxLane, fill with stay or null
+    const slots=Array(maxLane+1).fill(null);
+    dt.forEach(t=>{ slots[stayLane[t.id]]=t; });
+
+    const evHtml=slots.map(t=>{
+      if(!t) return `<div style="height:18px;margin-bottom:2px"></div>`; // spacer
+      const cl=`cev ${t.status==='plan'?'sp':t.status==='cancel'?'sx':''}`;
+      const bg=t.status==='cancel'?'#bbb':(t.color||COLORS[0]);
+      return`<div class="${cl}" style="background:${bg}" onclick="event.stopPropagation();openDetail('${t.id}')">${t.destination}</div>`;
+    }).join('');
+
+    return`<div class="ccell ${c.o?'om':''} ${it?'td':''}"><div class="cdate">${c.d.getDate()}</div>${evHtml}</div>`;
   }).join('');
 }
 
@@ -1128,14 +1271,15 @@ function openTripModal(id=null){
     document.getElementById('fhno').value=t.hotelNotes||'';
     scol=t.color||COLORS[0]; stSt=t.status||'plan';
     ctr=JSON.parse(JSON.stringify(t.transports||[]));
+    clr=JSON.parse(JSON.stringify(t.carRentals||[]));
     buildHotelSvcs(t.hotelSvcs||[]);
   } else {
     ['fd','fho','fbu','fac','fno','fhno'].forEach(i=>document.getElementById(i).value='');
     document.getElementById('fst').value=''; document.getElementById('fen').value='';
-    scol=COLORS[0]; stSt='plan'; ctr=[];
+    scol=COLORS[0]; stSt='plan'; ctr=[]; clr=[];
     buildHotelSvcs([]);
   }
-  buildCP(); renderTSR(); renderTL(); cancelTF();
+  buildCP(); renderTSR(); renderTL(); cancelTF(); renderLL(); cancelLF();
   document.getElementById('mtrip').classList.add('open');
 }
 
@@ -1172,7 +1316,7 @@ function saveTrip(){
     hotelNotes:document.getElementById('fhno').value.trim(),
     activities:document.getElementById('fac').value.trim(),
     notes:document.getElementById('fno').value.trim(),
-    color:scol,status:stSt,transports:ctr};
+    color:scol,status:stSt,transports:ctr,carRentals:clr};
   if(eid){const i=trips.findIndex(t=>t.id===eid);trips[i]=trip}else trips.push(trip);
   save();closeModal('mtrip');stats();render();
   showToast(eid?'✅ Voyage mis à jour !':'✅ Voyage ajouté !');
@@ -1244,6 +1388,61 @@ function saveTF(){
 function renderTFSR(){document.querySelectorAll('#tfsr .sopt').forEach(e=>e.classList.toggle('sel',e.dataset.v===tfSt))}
 function selTfSt(v){tfSt=v;renderTFSR()}
 
+// ── CAR RENTAL ────────────────────────────────────────────────
+function renderLL(){
+  const l=document.getElementById('llist');
+  if(!clr.length){l.innerHTML='<div style="color:#ccc;font-size:.83rem;text-align:center;padding:7px 0">Aucune location</div>';return}
+  l.innerHTML=clr.map((lr,i)=>{
+    const dep=lr.dep?fdt(lr.dep):'', ret=lr.ret?fdt(lr.ret):'';
+    const cost=lr.cost?parseFloat(lr.cost).toLocaleString('fr-FR')+' €':'';
+    return`<div class="tcard">
+      <div class="tic">🚙</div>
+      <div class="tinfo">
+        <div class="troute">${lr.agency||'Location voiture'}</div>
+        <div class="tmeta">${[dep&&ret?dep+' → '+ret:(dep||ret),cost].filter(Boolean).join(' · ')}</div>
+        <div style="margin-top:4px">${badge(lr.status||'plan')}</div>
+      </div>
+      <div class="tacts">
+        <button class="bic" onclick="editLF(${i})">✏</button>
+        <button class="bic" onclick="rmLF(${i})">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openLF(idx=null){
+  elIdx=idx;
+  document.getElementById('lftitle').textContent=idx!==null?'Modifier la location':'Nouvelle location';
+  if(idx!==null){
+    const lr=clr[idx];
+    document.getElementById('lfa').value=lr.agency||'';
+    document.getElementById('lfd').value=lr.dep||'';
+    document.getElementById('lfr').value=lr.ret||'';
+    document.getElementById('lfc').value=lr.cost||'';
+    lfSt=lr.status||'plan';
+  } else {
+    ['lfa','lfc'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('lfd').value=''; document.getElementById('lfr').value='';
+    lfSt='plan';
+  }
+  renderLFSR();
+  document.getElementById('lform').style.display='block';
+}
+function cancelLF(){document.getElementById('lform').style.display='none';elIdx=null}
+function editLF(i){openLF(i)}
+function rmLF(i){clr.splice(i,1);renderLL()}
+function saveLF(){
+  const lr={agency:document.getElementById('lfa').value.trim(),
+    dep:document.getElementById('lfd').value,
+    ret:document.getElementById('lfr').value,
+    cost:document.getElementById('lfc').value,
+    status:lfSt};
+  if(elIdx!==null)clr[elIdx]=lr;else clr.push(lr);
+  cancelLF();renderLL();
+}
+function renderLFSR(){document.querySelectorAll('#lfsr .sopt').forEach(e=>e.classList.toggle('sel',e.dataset.v===lfSt))}
+function selLfSt(v){lfSt=v;renderLFSR()}
+
 // ── DETAIL MODAL ──────────────────────────────────────────────
 function openDetail(id){
   const t=trips.find(x=>x.id===id);if(!t)return;
@@ -1256,6 +1455,14 @@ function openDetail(id){
       return`<div class="tdcard"><div class="tdroute">${TICONS[tr.type]||'🔵'} ${tr.from||'?'} → ${tr.to||'?'}</div>
         <div class="tdmeta">${[tr.company,dep&&arr?dep+' → '+arr:(dep||arr),tr.ref,tr.cost?parseFloat(tr.cost).toLocaleString('fr-FR')+' €':''].filter(Boolean).join(' · ')}</div>
         <div style="margin-top:4px">${badge(tr.status||'plan')}</div></div>`;
+    }).join('')}</div>`:'';
+
+  const lrHtml=(t.carRentals||[]).length?`<div class="dsec"><div class="dstitle">🚙 Location voiture (${t.carRentals.length})</div>
+    ${t.carRentals.map(lr=>{
+      const dep=lr.dep?fdt(lr.dep):'',ret=lr.ret?fdt(lr.ret):'';
+      return`<div class="tdcard"><div class="tdroute">🚙 ${lr.agency||'Location voiture'}</div>
+        <div class="tdmeta">${[dep&&ret?dep+' → '+ret:(dep||ret),lr.cost?parseFloat(lr.cost).toLocaleString('fr-FR')+' €':''].filter(Boolean).join(' · ')}</div>
+        <div style="margin-top:4px">${badge(lr.status||'plan')}</div></div>`;
     }).join('')}</div>`:'';
 
   document.getElementById('detbody').innerHTML=`
@@ -1272,15 +1479,127 @@ function openDetail(id){
     ${t.hotelNotes?`<div class="dsec"><div class="dstitle">Notes hébergement</div><div class="dsval">${t.hotelNotes}</div></div>`:''}
     ${t.activities?`<div class="dsec"><div class="dstitle">Activités</div><div class="dsval">${t.activities.replace(/\n/g,'<br>')}</div></div>`:''}
     ${trHtml}
+    ${lrHtml}
     ${t.notes?`<div class="dsec"><div class="dstitle">Notes</div><div class="dsval">${t.notes.replace(/\n/g,'<br>')}</div></div>`:''}
     <div class="factions">
       <button class="bcanc" onclick="closeModal('mdet')">Fermer</button>
+      <button class="bcanc" onclick="closeModal('mdet');openVoyagesModal('${t.id}')">✈ Voir le voyage</button>
       <button class="bsave" onclick="closeModal('mdet');openTripModal('${t.id}')">✏ Modifier</button>
     </div>`;
   document.getElementById('mdet').classList.add('open');
 }
 
-// ── TABS ──────────────────────────────────────────────────────
+// ── VOYAGES MODAL ─────────────────────────────────────────────
+function openVoyagesModal(highlightId=null){
+  const groups=computeGroups(trips.filter(t=>t.status!=='cancel'));
+  // Also include cancelled trips as solo groups for completeness? No — only active.
+  // Sort groups by first stay start date
+  const sorted=[...groups].sort((a,b)=>new Date(a.stays[0].start)-new Date(b.stays[0].start));
+
+  if(!sorted.length){
+    document.getElementById('voyages-body').innerHTML=
+      '<div style="padding:24px;text-align:center;color:#bbb;font-style:italic">Aucun voyage à afficher.</div>';
+    document.getElementById('mvoyages').classList.add('open');
+    return;
+  }
+
+  let h='';
+  sorted.forEach(g=>{
+    const first=g.stays[0], last=g.stays[g.stays.length-1];
+    const totalDur=Math.round((new Date(last.end)-new Date(first.start))/86400000)+1;
+    const isHighlighted=highlightId&&g.stays.some(s=>s.id===highlightId);
+    const groupName=g.stays.length===1
+      ? first.destination
+      : g.stays.map(s=>s.destination).join(' → ');
+
+    // Find departure transport: confirmed transport departing on first.start
+    const depTransports=g.stays.flatMap(s=>(s.transports||[]).filter(tr=>
+      tr.dep&&tr.dep.slice(0,10)===first.start&&tr.type!=='location'
+    )).sort((a,b)=>new Date(a.dep)-new Date(b.dep));
+
+    // Find return transport: confirmed transport arriving on last.end
+    const retTransports=g.stays.flatMap(s=>(s.transports||[]).filter(tr=>
+      tr.arr&&tr.arr.slice(0,10)===last.end&&tr.type!=='location'
+    )).sort((a,b)=>new Date(a.arr)-new Date(b.arr));
+
+    const renderTransport=tr=>{
+      const dep=tr.dep?fdt(tr.dep):'', arr=tr.arr?fdt(tr.arr):'';
+      const meta=[tr.company,dep&&arr?`${dep} → ${arr}`:(dep||arr),tr.ref,tr.cost?parseFloat(tr.cost).toLocaleString('fr-FR')+' €':''].filter(Boolean).join(' · ');
+      return`<div class="voy-transport-row">
+        <div class="voy-transport-icon">${TICONS[tr.type]||'🔵'}</div>
+        <div class="voy-transport-info">
+          <div class="voy-transport-route">${tr.from||'?'} → ${tr.to||'?'}</div>
+          ${meta?`<div class="voy-transport-meta">${meta}</div>`:''}
+          <div style="margin-top:4px">${badge(tr.status||'plan')}</div>
+        </div>
+      </div>`;
+    };
+
+    const renderStay=s=>{
+      const dur=Math.round((new Date(s.end)-new Date(s.start))/86400000)+1;
+      const isHL=s.id===highlightId;
+      const svcs=(s.hotelSvcs||[]).map(k=>{const sv=HOTEL_SVCS.find(x=>x.key===k);return sv?`<span class="voy-stay-svc">${sv.icon} ${sv.label}</span>`:''}).join('');
+      // Car rental for this stay
+      const carRentals=(s.carRentals||[]);
+      const carHtml=carRentals.map(lr=>{
+        const dep=lr.dep?fdt(lr.dep):'',ret=lr.ret?fdt(lr.ret):'';
+        const meta=[lr.agency,dep&&ret?`${dep} → ${ret}`:(dep||ret),lr.cost?parseFloat(lr.cost).toLocaleString('fr-FR')+' €':''].filter(Boolean).join(' · ');
+        return`<div style="display:flex;gap:6px;align-items:flex-start;margin-top:6px;padding:6px 8px;background:#f9f9f9;border-radius:6px;border:1px solid var(--sand)">
+          <span style="font-size:.9rem">🚙</span>
+          <div><div style="font-size:.8rem;font-weight:500">${lr.agency||'Location voiture'}</div>
+          ${meta?`<div style="font-size:.72rem;color:#aaa">${meta}</div>`:''}
+          <div style="margin-top:3px">${badge(lr.status||'plan')}</div></div>
+        </div>`;
+      }).join('');
+
+      return`<div class="voy-stay${isHL?' ':" "}" style="${isHL?'background:#fffbea;border-left:3px solid var(--gold);':''}" onclick="closeModal('mvoyages');openDetail('${s.id}')">
+        <div class="voy-stay-hd">
+          <div class="voy-stay-dot" style="background:${s.color||COLORS[0]}"></div>
+          <div class="voy-stay-dest">${s.destination}</div>
+          <div class="voy-stay-dates">${fd(s.start)} → ${fd(s.end)} · ${dur}j</div>
+          ${badge(s.status||'plan')}
+        </div>
+        ${s.hotel?`<div class="voy-stay-hotel">🏨 ${s.hotel}${(s.hotelSvcs||[]).length?' · '+svcs:''}</div>`:''}
+        ${s.hotelNotes?`<div style="font-size:.74rem;color:#aaa;margin-top:2px">📌 ${s.hotelNotes}</div>`:''}
+        ${carHtml}
+      </div>`;
+    };
+
+    h+=`<div class="voy-group" ${isHighlighted?'id="voy-highlight"':''}
+         style="${isHighlighted?'border-color:var(--gold);box-shadow:0 0 0 2px var(--gold)33;':''}">
+      <div class="voy-group-hd">
+        <div class="voy-group-name">${groupName}</div>
+        <span class="voy-group-dates">${fd(first.start)} – ${fd(last.end)}</span>
+        <span class="voy-group-dur">${totalDur}j</span>
+      </div>
+      ${depTransports.length
+        ?depTransports.map(renderTransport).join('')
+        :`<div class="voy-transport-row" style="color:#c0392b"><div class="voy-transport-icon">⚠</div><div class="voy-transport-info"><div class="voy-transport-route" style="color:#c0392b">Transport de départ manquant ou non confirmé</div></div></div>`
+      }
+      ${g.stays.map((s,i)=>{
+        const conn=i<g.stays.length-1
+          ?`<div class="voy-divider"><div class="voy-divider-line"></div><div class="voy-divider-lbl">→ suite</div><div class="voy-divider-line"></div></div>`
+          :'';
+        return renderStay(s)+conn;
+      }).join('')}
+      ${retTransports.length
+        ?retTransports.map(renderTransport).join('')
+        :`<div class="voy-transport-row" style="color:#c0392b"><div class="voy-transport-icon">⚠</div><div class="voy-transport-info"><div class="voy-transport-route" style="color:#c0392b">Transport de retour manquant ou non confirmé</div></div></div>`
+      }
+    </div>`;
+  });
+
+  document.getElementById('voyages-body').innerHTML=h;
+  document.getElementById('mvoyages').classList.add('open');
+
+  // Scroll to highlighted group if any
+  if(highlightId){
+    setTimeout(()=>{
+      const el=document.getElementById('voy-highlight');
+      if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+    },150);
+  }
+}
 document.querySelectorAll('.tabbtn').forEach(btn=>{
   btn.addEventListener('click',function(){
     const tab=this.dataset.tab;
