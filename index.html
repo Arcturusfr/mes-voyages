@@ -260,7 +260,7 @@ select.fi{cursor:pointer}
 .voy-group{border:1.5px solid var(--sand);border-radius:12px;margin-bottom:16px;overflow:hidden}
 .voy-group-hd{background:var(--ink);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .voy-group-name{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;flex:1}
-.voy-group-dates{font-size:.75rem;color:rgba(255,255,255,.55)}
+.voy-group-dates{font-size:.75rem;color:rgba(255,255,255,.85);font-weight:500}
 .voy-group-dur{font-size:.75rem;color:var(--gold);font-weight:600}
 .voy-transport-row{display:flex;align-items:flex-start;gap:10px;padding:10px 16px;background:#f9f9f9;border-bottom:1px solid var(--sand)}
 .voy-transport-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px}
@@ -280,6 +280,41 @@ select.fi{cursor:pointer}
 .voy-divider{display:flex;align-items:center;gap:8px;padding:5px 16px;background:#f5f5f5;border-bottom:1px solid var(--sand)}
 .voy-divider-line{flex:1;height:1px;background:var(--sand)}
 .voy-divider-lbl{font-size:.7rem;color:#bbb;text-transform:uppercase;letter-spacing:.5px}
+
+/* CHECKLIST */
+.cl-tabs{display:flex;gap:0;margin-bottom:16px;border-radius:8px;overflow:hidden;border:1.5px solid var(--sand)}
+.cl-tab{flex:1;padding:8px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;transition:all .2s;background:var(--sand2);color:#888}
+.cl-tab.active{background:var(--ink);color:#fff}
+.cl-section{margin-bottom:4px}
+.cl-section-title{font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:#aaa;margin-bottom:8px;font-weight:600}
+.cl-add-row{display:flex;gap:8px;margin-bottom:14px;position:relative}
+.cl-add-input{flex:1;padding:9px 12px;border:2px solid var(--sand);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.9rem;transition:border-color .2s}
+.cl-add-input:focus{outline:none;border-color:var(--ocean)}
+.cl-add-btn{padding:9px 16px;background:var(--ocean);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:.88rem;font-weight:500;white-space:nowrap;transition:background .2s}
+.cl-add-btn:hover{background:#1e5270}
+.cl-suggest{position:absolute;top:100%;left:0;right:48px;background:#fff;border:2px solid var(--ocean);border-top:none;border-radius:0 0 8px 8px;z-index:50;max-height:160px;overflow-y:auto;box-shadow:var(--sh)}
+.cl-suggest-item{padding:8px 12px;cursor:pointer;font-size:.88rem;transition:background .12s;display:flex;align-items:center;gap:7px;color:#555}
+.cl-suggest-item:hover{background:var(--sand2)}
+.cl-items{display:flex;flex-direction:column;gap:6px;min-height:32px}
+.cl-item{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--sand2);border-radius:8px;border:1.5px solid transparent;transition:all .15s}
+.cl-item.done{background:#f0faf0;border-color:#c8e6c9;opacity:.7}
+.cl-item.done .cl-item-text{text-decoration:line-through;color:#aaa}
+.cl-checkbox{width:18px;height:18px;border-radius:4px;border:2px solid #ccc;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.75rem;flex-shrink:0;transition:all .15s;background:#fff}
+.cl-checkbox.checked{background:var(--forest);border-color:var(--forest);color:#fff}
+.cl-item-text{flex:1;font-size:.88rem}
+.cl-item-cat{font-size:.68rem;padding:1px 7px;border-radius:10px;font-weight:600;flex-shrink:0}
+.cl-item-cat.bagages{background:#e8f4fd;color:#2e6b8a;border:1px solid #a8c9d8}
+.cl-item-cat.surSoi{background:#f3e8fd;color:#6a3fa0;border:1px solid #c8a8d8}
+.cl-item-cat.actions{background:#fff8e1;color:#b8860b;border:1px solid #f0d080}
+.cl-item-del{background:none;border:none;cursor:pointer;color:#ccc;font-size:.85rem;padding:2px 4px;border-radius:4px;transition:color .15s}
+.cl-item-del:hover{color:#c0392b}
+.cl-footer{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:12px;border-top:1px solid var(--sand)}
+.cl-progress{font-size:.8rem;color:#888}
+.cl-progress strong{color:var(--ocean)}
+.cl-reset-btn{font-size:.78rem;color:#aaa;background:none;border:1px solid var(--sand);padding:4px 10px;border-radius:6px;cursor:pointer;transition:all .15s}
+.cl-reset-btn:hover{color:var(--ink);border-color:#bbb}
+.cl-template-btn{font-size:.78rem;color:var(--ocean);background:none;border:1px solid var(--sky);padding:4px 10px;border-radius:6px;cursor:pointer;transition:all .15s}
+.cl-template-btn:hover{background:#f0f7fb}
 
 /* GROUP PANEL */
 .gpanel{background:#fff;border-radius:var(--r);box-shadow:var(--sh);margin-bottom:18px;overflow:hidden}
@@ -350,7 +385,7 @@ select.fi{cursor:pointer}
 <body>
 
 <header>
-  <h1>✈ Mes <span>Voyages</span><span class="version">v4.1</span></h1>
+  <h1>✈ Mes <span>Voyages</span><span class="version">v4.6</span></h1>
   <div class="hr">
     <div class="vtoggle">
       <button class="vbtn active" onclick="switchView('timeline')">📅 Timeline</button>
@@ -621,6 +656,17 @@ select.fi{cursor:pointer}
 </div>
 </div>
 
+<!-- ══ CHECKLIST MODAL ════════════════════════════════════════ -->
+<div class="overlay" id="mchecklist">
+<div class="modal" style="max-width:540px">
+  <div class="mhd">
+    <div class="mtitle">✅ Check-list</div>
+    <button class="mclose" onclick="closeModal('mchecklist')">✕</button>
+  </div>
+  <div class="mbody" id="checklist-body"></div>
+</div>
+</div>
+
 <script>
 // ── CONSTANTS ─────────────────────────────────────────────────
 const COLORS=['#2e6b8a','#4a7c59','#c17f5a','#8a6fa0','#d4a843','#e8845a','#5b8dd9','#c05a7a'];
@@ -630,6 +676,7 @@ const HOTEL_SVCS=[
   {key:'breakfast',icon:'🥐', label:'Petit-déj.'},
   {key:'parking',  icon:'🅿️', label:'Parking'},
   {key:'terrace',  icon:'🌿', label:'Terrasse/Balcon'},
+  {key:'seaview',  icon:'🌊', label:'Vue mer'},
 ];
 const MF=['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Août','Sep','Oct','Nov','Déc'];
 const MFL=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
@@ -638,10 +685,13 @@ const MFL=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','S
 let trips=JSON.parse(localStorage.getItem('mv-trips')||'[]');
 let dests=JSON.parse(localStorage.getItem('mv-dests')||'[]');
 let hotels=JSON.parse(localStorage.getItem('mv-hotels')||'[]');
+// Global checklist items bank (all items ever entered, for autocomplete)
+let clItems=JSON.parse(localStorage.getItem('mv-cl-items')||'[]');
 let filter='all', view='timeline';
 let cy=new Date().getFullYear(), cm=new Date().getMonth();
 let eid=null, scol=COLORS[0], stSt='plan', ctr=[], etIdx=null, tfSt='plan';
 let clr=[], elIdx=null, lfSt='plan'; // car rental state
+let clVoyageId=null, clActiveCat='bagages'; // checklist state
 
 function save(){
   localStorage.setItem('mv-trips',JSON.stringify(trips));
@@ -649,6 +699,7 @@ function save(){
   localStorage.setItem('mv-dests',JSON.stringify(dests));
   hotels=[...new Set(trips.map(t=>t.hotel).filter(Boolean))].sort();
   localStorage.setItem('mv-hotels',JSON.stringify(hotels));
+  localStorage.setItem('mv-cl-items',JSON.stringify(clItems));
 }
 function gid(){return Date.now().toString(36)+Math.random().toString(36).slice(2)}
 
@@ -915,7 +966,7 @@ function getMonthColWidth(){
   const wrap=document.querySelector('.gwrap');
   if(!wrap) return 80;
   const avail=wrap.clientWidth-210;
-  return Math.floor(avail/6); // exactly 6 columns visible
+  return Math.floor(avail/5); // exactly 5 columns visible
 }
 
 function renderGantt(){
@@ -1571,6 +1622,7 @@ function openVoyagesModal(highlightId=null){
         <div class="voy-group-name">${groupName}</div>
         <span class="voy-group-dates">${fd(first.start)} – ${fd(last.end)}</span>
         <span class="voy-group-dur">${totalDur}j</span>
+        <button onclick="openChecklistModal('${g.stays.map(s=>s.id).join(',')}')" style="padding:4px 10px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:6px;cursor:pointer;font-size:.75rem;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:background .2s" onmouseover="this.style.background='rgba(255,255,255,.25)'" onmouseout="this.style.background='rgba(255,255,255,.15)'">✅ Check-list</button>
       </div>
       ${depTransports.length
         ?depTransports.map(renderTransport).join('')
@@ -1600,6 +1652,186 @@ function openVoyagesModal(highlightId=null){
     },150);
   }
 }
+// ── CHECKLIST ─────────────────────────────────────────────────
+function openChecklistModal(groupIds){
+  clVoyageId=groupIds;
+  clActiveCat='bagages';
+  renderChecklist();
+  document.getElementById('mchecklist').classList.add('open');
+}
+
+function getVoyageChecklist(){
+  const ids=clVoyageId.split(',');
+  const t=trips.find(x=>x.id===ids[0]);
+  const cl=t?JSON.parse(JSON.stringify(t.checklist||{})):{};
+  // Ensure all 3 categories always exist
+  if(!cl.bagages) cl.bagages=[];
+  if(!cl.surSoi)  cl.surSoi=[];
+  if(!cl.actions) cl.actions=[];
+  return cl;
+}
+
+function saveVoyageChecklist(cl){
+  const ids=clVoyageId.split(',');
+  const t=trips.find(x=>x.id===ids[0]);
+  if(t){t.checklist=cl;save();}
+}
+
+function renderChecklist(){
+  const cl=getVoyageChecklist();
+  const cat=clActiveCat;
+  const items=cl[cat]||[];
+  const done=items.filter(i=>i.checked).length;
+  const total=items.length;
+
+  const CAT_META={
+    bagages:{label:'🧳 Dans les bagages', icon:'🧳', css:'bagages'},
+    surSoi: {label:'👜 Sur soi',          icon:'👜', css:'surSoi'},
+    actions:{label:'⚡ À faire avant de partir', icon:'⚡', css:'actions'},
+  };
+  const catLabel=CAT_META[cat].label;
+  const catIcon=CAT_META[cat].icon;
+
+  // Other cats for "copy from" button
+  const otherCats=Object.keys(CAT_META).filter(c=>c!==cat&&(cl[c]||[]).length>0);
+
+  const ids=clVoyageId.split(',');
+  const t=trips.find(x=>x.id===ids[0]);
+  const voyName=t?(t.destination+(ids.length>1?' et al.':'')):'';
+  // Find last stay of the group for end date
+  const groupTrips=trips.filter(x=>ids.includes(x.id)).sort((a,b)=>new Date(a.start)-new Date(b.start));
+  const voyStart=groupTrips.length?fd(groupTrips[0].start):'';
+  const voyEnd=groupTrips.length?fd(groupTrips[groupTrips.length-1].end):'';
+
+  document.getElementById('checklist-body').innerHTML=`
+    <div style="font-size:.8rem;color:#888;margin-bottom:12px">Voyage : <strong>${voyName}</strong>${voyStart?` · <span style="color:var(--ocean);font-weight:500">${voyStart} → ${voyEnd}</span>`:''}</div>
+    <div class="cl-tabs">
+      <button class="cl-tab ${cat==='bagages'?'active':''}" onclick="switchClCat('bagages')">🧳 Bagages (${(cl.bagages||[]).length})</button>
+      <button class="cl-tab ${cat==='surSoi'?'active':''}" onclick="switchClCat('surSoi')">👜 Sur soi (${(cl.surSoi||[]).length})</button>
+      <button class="cl-tab ${cat==='actions'?'active':''}" onclick="switchClCat('actions')">⚡ Actions (${(cl.actions||[]).length})</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <button class="cl-template-btn" onclick="loadTemplate('${cat}')">📋 Charger modèle</button>
+      <button class="cl-template-btn" onclick="saveAsTemplate('${cat}')">💾 Sauver comme modèle</button>
+      ${otherCats.map(c=>`<button class="cl-template-btn" onclick="copyFromOtherCat('${c}')">↕ Copier depuis ${CAT_META[c].icon}</button>`).join('')}
+    </div>
+    <div class="cl-add-row">
+      <input class="cl-add-input" id="cl-input" placeholder="Ajouter un item…" autocomplete="off"
+        oninput="showClSuggest(this.value)" onblur="hideClSuggest()"
+        onkeydown="if(event.key==='Enter')addClItem()">
+      <button class="cl-add-btn" onclick="addClItem()">＋</button>
+      <div class="cl-suggest" id="cl-suggest" style="display:none"></div>
+    </div>
+    <div class="cl-section">
+      <div class="cl-section-title">${catLabel} — ${total} item${total!==1?'s':''}</div>
+      <div class="cl-items">
+        ${items.length?items.map((item,i)=>`
+          <div class="cl-item ${item.checked?'done':''}">
+            <div class="cl-checkbox ${item.checked?'checked':''}" onclick="toggleClItem(${i})">${item.checked?'✓':''}</div>
+            <span class="cl-item-text">${item.text}</span>
+            <span class="cl-item-cat ${cat}">${catIcon}</span>
+            <button class="cl-item-del" onclick="deleteClItem(${i})">✕</button>
+          </div>`).join('')
+        :`<div style="color:#ccc;font-size:.83rem;text-align:center;padding:16px 0">Liste vide — ajoutez des items !</div>`}
+      </div>
+    </div>
+    <div class="cl-footer">
+      <div class="cl-progress">${done>0?`<strong>${done}</strong>/${total} fait${done>1?'s':''}`:total>0?`0/${total} — rien de coché`:''}  </div>
+      <div style="display:flex;gap:8px">
+        ${done>0?`<button class="cl-reset-btn" onclick="resetChecklist()">↺ Tout décocher</button>`:''}
+        ${total>0?`<button class="cl-reset-btn" onclick="clearChecklist()">🗑 Vider</button>`:''}
+      </div>
+    </div>`;
+}
+
+function switchClCat(cat){clActiveCat=cat;renderChecklist()}
+
+function addClItem(){
+  const inp=document.getElementById('cl-input');
+  const text=inp.value.trim();
+  if(!text)return;
+  const cl=getVoyageChecklist();
+  if(!cl[clActiveCat])cl[clActiveCat]=[];
+  cl[clActiveCat].push({text,checked:false});
+  if(!clItems.includes(text))clItems.push(text);
+  saveVoyageChecklist(cl);
+  inp.value='';
+  document.getElementById('cl-suggest').style.display='none';
+  renderChecklist();
+  setTimeout(()=>{const inp=document.getElementById('cl-input');if(inp)inp.focus()},50);
+}
+
+function toggleClItem(i){
+  const cl=getVoyageChecklist();
+  cl[clActiveCat][i].checked=!cl[clActiveCat][i].checked;
+  saveVoyageChecklist(cl);renderChecklist();
+}
+
+function deleteClItem(i){
+  const cl=getVoyageChecklist();
+  cl[clActiveCat].splice(i,1);
+  saveVoyageChecklist(cl);renderChecklist();
+}
+
+function resetChecklist(){
+  const cl=getVoyageChecklist();
+  cl[clActiveCat].forEach(i=>i.checked=false);
+  saveVoyageChecklist(cl);renderChecklist();
+}
+
+function clearChecklist(){
+  if(!confirm('Vider toute la liste ?'))return;
+  const cl=getVoyageChecklist();
+  cl[clActiveCat]=[];
+  saveVoyageChecklist(cl);renderChecklist();
+}
+
+function loadTemplate(cat){
+  const tpl=JSON.parse(localStorage.getItem('mv-cl-tpl-'+cat)||'[]');
+  if(!tpl.length){showToast('Aucun modèle sauvegardé pour cette catégorie.');return}
+  const cl=getVoyageChecklist();
+  if(!cl[cat]) cl[cat]=[];
+  const existing=new Set(cl[cat].map(i=>i.text));
+  tpl.forEach(text=>{if(!existing.has(text))cl[cat].push({text,checked:false});});
+  saveVoyageChecklist(cl);renderChecklist();
+  showToast(`✅ ${tpl.length} item(s) chargés depuis le modèle`);
+}
+
+function saveAsTemplate(cat){
+  const cl=getVoyageChecklist();
+  const items=cl[cat].map(i=>i.text);
+  if(!items.length){showToast('La liste est vide.');return}
+  localStorage.setItem('mv-cl-tpl-'+cat,JSON.stringify(items));
+  showToast(`💾 Modèle sauvegardé (${items.length} item(s))`);
+}
+
+function copyFromOtherCat(fromCat){
+  const cl=getVoyageChecklist();
+  const existing=new Set(cl[clActiveCat].map(i=>i.text));
+  (cl[fromCat]||[]).forEach(i=>{if(!existing.has(i.text))cl[clActiveCat].push({text:i.text,checked:false});});
+  saveVoyageChecklist(cl);renderChecklist();
+}
+
+let clSuggestTimeout=null;
+function showClSuggest(val){
+  clearTimeout(clSuggestTimeout);
+  const s=document.getElementById('cl-suggest');if(!s)return;
+  const q=val.trim().toLowerCase();
+  if(!q){s.style.display='none';return}
+  const cl=getVoyageChecklist();
+  const existing=new Set(cl[clActiveCat].map(i=>i.text.toLowerCase()));
+  const bank=[...new Set([...clItems,...(cl.bagages||[]).map(i=>i.text),...(cl.surSoi||[]).map(i=>i.text),...(cl.actions||[]).map(i=>i.text)])];
+  const matches=bank.filter(t=>t.toLowerCase().includes(q)&&!existing.has(t.toLowerCase())).slice(0,8);
+  if(!matches.length){s.style.display='none';return}
+  s.innerHTML=matches.map(t=>`<div class="cl-suggest-item" onmousedown="pickClSuggest('${t.replace(/'/g,"\\'")}')">📌 ${t}</div>`).join('');
+  s.style.display='block';
+}
+function hideClSuggest(){clSuggestTimeout=setTimeout(()=>{const s=document.getElementById('cl-suggest');if(s)s.style.display='none'},200)}
+function pickClSuggest(val){
+  const inp=document.getElementById('cl-input');
+  if(inp){inp.value=val;document.getElementById('cl-suggest').style.display='none';addClItem();}
+}
+
 document.querySelectorAll('.tabbtn').forEach(btn=>{
   btn.addEventListener('click',function(){
     const tab=this.dataset.tab;
