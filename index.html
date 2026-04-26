@@ -385,7 +385,7 @@ select.fi{cursor:pointer}
 <body>
 
 <header>
-  <h1>✈ Mes <span>Voyages</span><span class="version">v4.6</span></h1>
+  <h1>✈ Mes <span>Voyages</span><span class="version">v4.7</span></h1>
   <div class="hr">
     <div class="vtoggle">
       <button class="vbtn active" onclick="switchView('timeline')">📅 Timeline</button>
@@ -1848,7 +1848,18 @@ document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{
 
 // ── EXPORT / IMPORT ───────────────────────────────────────────
 function exportData(){
-  const blob=new Blob([JSON.stringify({version:2,exportedAt:new Date().toISOString(),trips},null,2)],{type:'application/json'});
+  const data={
+    version:2,
+    exportedAt:new Date().toISOString(),
+    trips,
+    clItems,
+    clTemplates:{
+      bagages:JSON.parse(localStorage.getItem('mv-cl-tpl-bagages')||'[]'),
+      surSoi: JSON.parse(localStorage.getItem('mv-cl-tpl-surSoi') ||'[]'),
+      actions:JSON.parse(localStorage.getItem('mv-cl-tpl-actions')||'[]'),
+    }
+  };
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
   a.download=`mes-voyages-${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(a.href);
   showToast('✅ Données exportées !');
@@ -1864,7 +1875,21 @@ function importData(e){
       const merge=confirm(`Importer ${imp.length} voyage(s) ?\n\nOK = Fusionner\nAnnuler = Remplacer`);
       if(merge){const ids=new Set(trips.map(t=>t.id));trips=[...trips,...imp.filter(t=>!ids.has(t.id))]}
       else trips=imp;
-      save();stats();render();showToast(`✅ ${imp.length} voyage(s) importé(s) !`);
+
+      // Restore checklist templates if present
+      if(data.clTemplates){
+        ['bagages','surSoi','actions'].forEach(cat=>{
+          if(data.clTemplates[cat]&&data.clTemplates[cat].length)
+            localStorage.setItem('mv-cl-tpl-'+cat,JSON.stringify(data.clTemplates[cat]));
+        });
+      }
+      // Restore global items bank if present
+      if(data.clItems&&data.clItems.length){
+        clItems=[...new Set([...clItems,...data.clItems])];
+      }
+
+      save();stats();render();
+      showToast(`✅ ${imp.length} voyage(s) importé(s)${data.clTemplates?' + modèles check-list':''}!`);
     }catch{showToast('❌ Erreur de lecture.')}
     e.target.value='';
   };r.readAsText(file);
