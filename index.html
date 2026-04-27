@@ -385,7 +385,7 @@ select.fi{cursor:pointer}
 <body>
 
 <header>
-  <h1>✈ Mes <span>Voyages</span><span class="version">v4.7</span></h1>
+  <h1>✈ Mes <span>Voyages</span><span class="version">v4.8</span></h1>
   <div class="hr">
     <div class="vtoggle">
       <button class="vbtn active" onclick="switchView('timeline')">📅 Timeline</button>
@@ -1563,15 +1563,17 @@ function openVoyagesModal(highlightId=null){
       ? first.destination
       : g.stays.map(s=>s.destination).join(' → ');
 
-    // Find departure transport: confirmed transport departing on first.start
+    // Find departure transports (any status) departing on first.start
     const depTransports=g.stays.flatMap(s=>(s.transports||[]).filter(tr=>
       tr.dep&&tr.dep.slice(0,10)===first.start&&tr.type!=='location'
     )).sort((a,b)=>new Date(a.dep)-new Date(b.dep));
+    const hasConfirmedDep=depTransports.some(tr=>tr.status==='confirm');
 
-    // Find return transport: confirmed transport arriving on last.end
+    // Find return transports (any status) arriving on last.end
     const retTransports=g.stays.flatMap(s=>(s.transports||[]).filter(tr=>
       tr.arr&&tr.arr.slice(0,10)===last.end&&tr.type!=='location'
     )).sort((a,b)=>new Date(a.arr)-new Date(b.arr));
+    const hasConfirmedRet=retTransports.some(tr=>tr.status==='confirm');
 
     const renderTransport=tr=>{
       const dep=tr.dep?fdt(tr.dep):'', arr=tr.arr?fdt(tr.arr):'';
@@ -1625,8 +1627,10 @@ function openVoyagesModal(highlightId=null){
         <button onclick="openChecklistModal('${g.stays.map(s=>s.id).join(',')}')" style="padding:4px 10px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:6px;cursor:pointer;font-size:.75rem;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:background .2s" onmouseover="this.style.background='rgba(255,255,255,.25)'" onmouseout="this.style.background='rgba(255,255,255,.15)'">✅ Check-list</button>
       </div>
       ${depTransports.length
-        ?depTransports.map(renderTransport).join('')
-        :`<div class="voy-transport-row" style="color:#c0392b"><div class="voy-transport-icon">⚠</div><div class="voy-transport-info"><div class="voy-transport-route" style="color:#c0392b">Transport de départ manquant ou non confirmé</div></div></div>`
+        ? depTransports.map(renderTransport).join('')+(!hasConfirmedDep
+            ?`<div class="voy-transport-row"><div class="voy-transport-icon">⚠</div><div class="voy-transport-info"><div class="voy-transport-route" style="color:#c0392b">Aucun transport de départ confirmé</div></div></div>`
+            :'')
+        :`<div class="voy-transport-row"><div class="voy-transport-icon">⚠</div><div class="voy-transport-info"><div class="voy-transport-route" style="color:#c0392b">Transport de départ manquant ou non confirmé</div></div></div>`
       }
       ${g.stays.map((s,i)=>{
         const conn=i<g.stays.length-1
@@ -1635,8 +1639,10 @@ function openVoyagesModal(highlightId=null){
         return renderStay(s)+conn;
       }).join('')}
       ${retTransports.length
-        ?retTransports.map(renderTransport).join('')
-        :`<div class="voy-transport-row" style="color:#c0392b"><div class="voy-transport-icon">⚠</div><div class="voy-transport-info"><div class="voy-transport-route" style="color:#c0392b">Transport de retour manquant ou non confirmé</div></div></div>`
+        ? retTransports.map(renderTransport).join('')+(!hasConfirmedRet
+            ?`<div class="voy-transport-row"><div class="voy-transport-icon">⚠</div><div class="voy-transport-info"><div class="voy-transport-route" style="color:#c0392b">Aucun transport de retour confirmé</div></div></div>`
+            :'')
+        :`<div class="voy-transport-row"><div class="voy-transport-icon">⚠</div><div class="voy-transport-info"><div class="voy-transport-route" style="color:#c0392b">Transport de retour manquant ou non confirmé</div></div></div>`
       }
     </div>`;
   });
