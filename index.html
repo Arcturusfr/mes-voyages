@@ -117,28 +117,33 @@ main{padding:22px 24px}
 .gtable{display:inline-flex;flex-direction:column;min-width:100%}
 
 /* Header */
-.gantt-head{display:flex;user-select:none;background:var(--theme-bg,var(--sea-deep));color:var(--theme-tx,#fff);transition:background .25s,color .25s}
-/* Label cell: title + year nav + slide nav */
-.gh-label{width:210px;min-width:210px;padding:7px 12px;border-right:1px solid var(--theme-sep,rgba(255,255,255,.1));position:sticky;left:0;z-index:4;background:var(--theme-bg,var(--sea-deep));box-sizing:border-box;transition:background .25s,color .25s;display:flex;flex-direction:column;justify-content:center;gap:5px}
-.gh-label-title{font-size:.78rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;opacity:.8;font-family:'Jost',sans-serif;color:var(--theme-tx,#fff)}
+.gantt-head{display:flex;user-select:none;background:var(--theme-bg,var(--sea-deep));color:var(--theme-tx,#fff);transition:background .25s,color .25s;position:relative}
+/* Label cell: title + year nav only */
+.gh-label{width:210px;min-width:210px;padding:7px 12px;border-right:1px solid var(--theme-sep,rgba(255,255,255,.1));position:sticky;left:0;z-index:4;background:var(--theme-bg,var(--sea-deep));box-sizing:border-box;transition:background .25s,color .25s;display:flex;flex-direction:column;justify-content:center;gap:6px}
+.gh-label-title{font-size:.85rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;opacity:.85;font-family:'Jost',sans-serif;color:var(--theme-tx,#fff)}
 .gh-year-nav{display:flex;align-items:center;gap:5px}
-.gh-slide-nav{display:flex;align-items:center;gap:5px}
-.gh-slide-lbl{font-size:.62rem;color:rgba(255,255,255,.45);font-family:'Jost',sans-serif;font-weight:400;letter-spacing:.3px}
-.gh-yr-btn{width:20px;height:20px;border-radius:50%;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);cursor:pointer;color:inherit;font-size:.75rem;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:'Jost',sans-serif}
+.gh-yr-btn{width:22px;height:22px;border-radius:50%;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);cursor:pointer;color:inherit;font-size:.78rem;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:'Jost',sans-serif}
 .gh-yr-btn:hover{background:rgba(255,255,255,.28)}
-.gh-year{font-family:'Jost',sans-serif;font-size:1rem;font-weight:700;color:var(--theme-tx,#fff);min-width:40px;text-align:center}
-.gh-mon{width:var(--mcw,80px);min-width:var(--mcw,80px);padding:10px 3px;text-align:center;font-size:.86rem;font-weight:600;border-right:1px solid var(--theme-sep,rgba(255,255,255,.1));box-sizing:border-box;flex-shrink:0;font-family:'Jost',sans-serif;letter-spacing:.3px}
+.gh-year{font-family:'Jost',sans-serif;font-size:1.05rem;font-weight:700;color:var(--theme-tx,#fff);min-width:42px;text-align:center}
+/* Month names */
+.gh-mon{width:var(--mcw,80px);min-width:var(--mcw,80px);padding:10px 3px;text-align:center;font-size:.9rem;font-weight:600;border-right:1px solid var(--theme-sep,rgba(255,255,255,.1));box-sizing:border-box;flex-shrink:0;font-family:'Jost',sans-serif;letter-spacing:.3px}
 .gh-mon.cur{background:rgba(0,0,0,.12);font-weight:800}
+/* Floating scroll arrows overlaid on first/last visible month */
+.gscroll-arrow{position:absolute;top:0;bottom:0;width:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;background:rgba(26,95,128,.45);backdrop-filter:blur(2px);color:#fff;font-size:1rem;font-weight:700;border:none;transition:background .2s;pointer-events:all}
+.gscroll-arrow:hover{background:rgba(26,95,128,.72)}
+.gscroll-arrow.left{left:210px;border-radius:0 4px 4px 0}
+.gscroll-arrow.right{right:0;border-radius:4px 0 0 4px}
 
 /* Data rows */
-.gantt-row{display:flex;border-bottom:1px solid var(--sand);min-height:56px;cursor:pointer;transition:background .15s}
+.gantt-row{display:flex;border-bottom:1px solid var(--sand);min-height:60px;cursor:pointer;transition:background .15s}
 .gantt-row:hover{background:var(--sky)}.gantt-row:last-child{border-bottom:none}
-.ginfo{width:210px;min-width:210px;padding:8px 12px;display:flex;flex-direction:column;justify-content:center;gap:2px;border-right:1px solid var(--sand);position:sticky;left:0;background:#fff;z-index:2;box-shadow:3px 0 8px rgba(26,95,128,.06);box-sizing:border-box;flex-shrink:0}
+.ginfo{width:210px;min-width:210px;padding:8px 12px;display:flex;flex-direction:column;justify-content:center;gap:3px;border-right:1px solid var(--sand);position:sticky;left:0;background:#fff;z-index:2;box-shadow:3px 0 8px rgba(26,95,128,.06);box-sizing:border-box;flex-shrink:0}
 .gantt-row:hover .ginfo{background:var(--sky)}
-.gdest{font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'Jost',sans-serif}
-.ghotel{font-size:.72rem;color:#7a9aaa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:italic}
+.gdest{font-weight:700;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'Jost',sans-serif;color:var(--ink)}
+.ghotel{font-size:.78rem;color:#2a3a44;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:italic;font-weight:500}
+.gdates-row{font-size:.74rem;color:#1a2e3a;font-weight:500;font-family:'Jost',sans-serif}
 .gmeta{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
-.gdur{font-size:.68rem;color:#aac0cc}
+.gdur{font-size:.72rem;color:#7a9aaa}
 
 /* Month cells */
 .gcols{display:flex;flex:1;position:relative}
@@ -156,7 +161,7 @@ main{padding:22px 24px}
 /* CALENDAR */
 .ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
 .cnav{display:flex;align-items:center;gap:12px}
-.ctitle{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;min-width:200px;text-align:center}
+.ctitle{font-family:'Jost',sans-serif;font-size:1.3rem;font-weight:700;min-width:200px;text-align:center;letter-spacing:-.2px}
 .cgrid{background:#fff;border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
 .cdh{display:grid;grid-template-columns:repeat(7,1fr);background:var(--theme-bg,var(--sea-deep));color:var(--theme-tx,#fff);transition:background .25s,color .25s}
 .cdn{padding:11px;text-align:center;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;font-family:'Jost',sans-serif}
@@ -398,7 +403,7 @@ select.fi{cursor:pointer}
 <body>
 
 <header>
-  <h1>✈ Mes <span>Voyages</span><span class="version">v5.4</span></h1>
+  <h1>✈ Mes <span>Voyages</span><span class="version">v5.5</span></h1>
   <div class="hr">
     <div class="vtoggle">
       <button class="vbtn active" onclick="switchView('timeline')">📅 Timeline</button>
@@ -1051,7 +1056,7 @@ function renderGantt(){
         <div class="ginfo">
           <div class="gdest">${t.destination}${pill}</div>
           ${t.hotel?`<div class="ghotel">🏨 ${t.hotel}${(t.hotelSvcs||[]).map(k=>{const s=HOTEL_SVCS.find(x=>x.key===k);return s?`<span class="ghotel-svc">${s.icon}</span>`:''}).join('')}</div>`:''}
-          <div style="font-size:.7rem;color:#aaa;margin-top:1px">${fd(t.start)} → ${fd(t.end)}</div>
+          <div class="gdates-row">${fd(t.start)} → ${fd(t.end)}</div>
           <div class="gmeta">${badge(t.status)}<span class="gdur">${dur}j</span></div>
         </div>
         <div class="gcols">
@@ -1076,13 +1081,10 @@ function renderGantt(){
             <span class="gh-year">${cy}</span>
             <button class="gh-yr-btn" onclick="changeYear(1)">›</button>
           </div>
-          <div class="gh-slide-nav">
-            <button class="gh-yr-btn" onclick="shiftMonths(-1)">‹</button>
-            <span class="gh-slide-lbl">glisser</span>
-            <button class="gh-yr-btn" onclick="shiftMonths(1)">›</button>
-          </div>
         </div>
         ${headMons}
+        <button class="gscroll-arrow left" onclick="shiftMonths(-1)">‹</button>
+        <button class="gscroll-arrow right" onclick="shiftMonths(1)">›</button>
       </div>
       ${rows}
     </div>`;
