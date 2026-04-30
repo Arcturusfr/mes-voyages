@@ -118,17 +118,17 @@ main{padding:22px 24px}
 
 /* Header */
 .gantt-head{display:flex;user-select:none;background:var(--theme-bg,var(--sea-deep));color:var(--theme-tx,#fff);transition:background .25s,color .25s}
-/* Label cell now contains year + nav */
-.gh-label{width:210px;min-width:210px;padding:8px 12px;border-right:1px solid var(--theme-sep,rgba(255,255,255,.1));position:sticky;left:0;z-index:4;background:var(--theme-bg,var(--sea-deep));box-sizing:border-box;transition:background .25s,color .25s;display:flex;flex-direction:column;justify-content:center;gap:4px}
-.gh-label-top{display:flex;align-items:center;gap:6px}
-.gh-label-title{font-size:.62rem;text-transform:uppercase;letter-spacing:1.2px;font-weight:700;opacity:.6;font-family:'Jost',sans-serif;color:var(--theme-tx,rgba(255,255,255,.85))}
+/* Label cell: title + year nav + slide nav */
+.gh-label{width:210px;min-width:210px;padding:7px 12px;border-right:1px solid var(--theme-sep,rgba(255,255,255,.1));position:sticky;left:0;z-index:4;background:var(--theme-bg,var(--sea-deep));box-sizing:border-box;transition:background .25s,color .25s;display:flex;flex-direction:column;justify-content:center;gap:5px}
+.gh-label-title{font-size:.78rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;opacity:.8;font-family:'Jost',sans-serif;color:var(--theme-tx,#fff)}
 .gh-year-nav{display:flex;align-items:center;gap:5px}
-.gh-yr-btn{width:22px;height:22px;border-radius:50%;border:1.5px solid rgba(255,255,255,.35);background:rgba(255,255,255,.1);cursor:pointer;color:inherit;font-size:.8rem;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:'Jost',sans-serif}
-.gh-yr-btn:hover{background:rgba(255,255,255,.25)}
-.gh-year{font-family:'Jost',sans-serif;font-size:1.1rem;font-weight:700;color:var(--theme-tx,#fff);min-width:44px;text-align:center}
-
-.gh-mon{width:var(--mcw,80px);min-width:var(--mcw,80px);padding:10px 3px;text-align:center;font-size:.75rem;font-weight:500;border-right:1px solid var(--theme-sep,rgba(255,255,255,.1));box-sizing:border-box;flex-shrink:0;font-family:'Jost',sans-serif}
-.gh-mon.cur{background:rgba(0,0,0,.1);font-weight:700}
+.gh-slide-nav{display:flex;align-items:center;gap:5px}
+.gh-slide-lbl{font-size:.62rem;color:rgba(255,255,255,.45);font-family:'Jost',sans-serif;font-weight:400;letter-spacing:.3px}
+.gh-yr-btn{width:20px;height:20px;border-radius:50%;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);cursor:pointer;color:inherit;font-size:.75rem;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:'Jost',sans-serif}
+.gh-yr-btn:hover{background:rgba(255,255,255,.28)}
+.gh-year{font-family:'Jost',sans-serif;font-size:1rem;font-weight:700;color:var(--theme-tx,#fff);min-width:40px;text-align:center}
+.gh-mon{width:var(--mcw,80px);min-width:var(--mcw,80px);padding:10px 3px;text-align:center;font-size:.86rem;font-weight:600;border-right:1px solid var(--theme-sep,rgba(255,255,255,.1));box-sizing:border-box;flex-shrink:0;font-family:'Jost',sans-serif;letter-spacing:.3px}
+.gh-mon.cur{background:rgba(0,0,0,.12);font-weight:800}
 
 /* Data rows */
 .gantt-row{display:flex;border-bottom:1px solid var(--sand);min-height:56px;cursor:pointer;transition:background .15s}
@@ -398,7 +398,7 @@ select.fi{cursor:pointer}
 <body>
 
 <header>
-  <h1>✈ Mes <span>Voyages</span><span class="version">v5.3</span></h1>
+  <h1>✈ Mes <span>Voyages</span><span class="version">v5.4</span></h1>
   <div class="hr">
     <div class="vtoggle">
       <button class="vbtn active" onclick="switchView('timeline')">📅 Timeline</button>
@@ -443,13 +443,6 @@ select.fi{cursor:pointer}
 
 <main>
   <div class="view active" id="vt">
-    <div class="th">
-      <div style="display:flex;align-items:center;gap:6px;background:var(--sea-pale);border-radius:8px;padding:4px 8px;border:1px solid var(--sand)">
-        <button class="gh-yr-btn" style="background:rgba(42,127,165,.15);border-color:var(--sea-pale);color:var(--sea)" onclick="shiftMonths(-1)" title="Mois précédent">‹</button>
-        <span style="font-size:.72rem;color:var(--sea);font-weight:500">glisser</span>
-        <button class="gh-yr-btn" style="background:rgba(42,127,165,.15);border-color:var(--sea-pale);color:var(--sea)" onclick="shiftMonths(1)" title="Mois suivant">›</button>
-      </div>
-    </div>
     <div class="gwrap"><div class="gscroll" id="gscroll"><div id="gantt"></div></div></div>
   </div>
 
@@ -1077,13 +1070,16 @@ function renderGantt(){
     <div class="gtable">
       <div class="gantt-head">
         <div class="gh-label">
-          <div class="gh-label-top">
-            <span class="gh-label-title">Séjour</span>
-          </div>
+          <div class="gh-label-title">Séjour</div>
           <div class="gh-year-nav">
             <button class="gh-yr-btn" onclick="changeYear(-1)">‹</button>
             <span class="gh-year">${cy}</span>
             <button class="gh-yr-btn" onclick="changeYear(1)">›</button>
+          </div>
+          <div class="gh-slide-nav">
+            <button class="gh-yr-btn" onclick="shiftMonths(-1)">‹</button>
+            <span class="gh-slide-lbl">glisser</span>
+            <button class="gh-yr-btn" onclick="shiftMonths(1)">›</button>
           </div>
         </div>
         ${headMons}
