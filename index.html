@@ -112,8 +112,8 @@ main{padding:22px 24px}
 .th{display:flex;align-items:center;justify-content:flex-end;margin-bottom:12px;flex-wrap:wrap;gap:8px}
 .gwrap{background:#fff;border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;position:relative}
 .gscroll{overflow-x:scroll;-webkit-overflow-scrolling:touch;scrollbar-width:none;cursor:grab}
-/* Floating scroll arrows: fully opaque, always visible */
-.gscroll-arrow{position:absolute;top:0;width:28px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;background:var(--sea-deep);color:#fff;font-size:1.1rem;font-weight:700;border:none;transition:background .2s;pointer-events:all}
+/* Floating scroll arrows: height matches header, never overflows */
+.gscroll-arrow{position:absolute;top:0;width:28px;height:44px;max-height:100%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;background:var(--sea-deep);color:#fff;font-size:1.1rem;font-weight:700;border:none;transition:background .2s;pointer-events:all;overflow:hidden}
 .gscroll-arrow:hover{background:var(--sea)}
 .gscroll-arrow.left{left:210px;border-radius:0 4px 4px 0}
 .gscroll-arrow.right{right:0;border-radius:4px 0 0 4px}
@@ -123,9 +123,14 @@ main{padding:22px 24px}
 
 /* Header */
 .gantt-head{display:flex;user-select:none;background:var(--theme-bg,var(--sea-deep));color:var(--theme-tx,#fff);transition:background .25s,color .25s;position:relative}
+/* Floating scroll arrows: clipped to header height only */
+.gscroll-arrow{position:absolute;top:0;width:28px;height:var(--head-h,44px);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;background:var(--sea-deep);color:#fff;font-size:1.1rem;font-weight:700;border:none;transition:background .2s;pointer-events:all}
+.gscroll-arrow:hover{background:var(--sea)}
+.gscroll-arrow.left{left:210px;border-radius:0 4px 4px 0}
+.gscroll-arrow.right{right:0;border-radius:4px 0 0 4px}
 /* Label cell: SÉJOURS + year nav on same line */
 .gh-label{width:210px;min-width:210px;padding:7px 12px;border-right:1px solid var(--theme-sep,rgba(255,255,255,.1));position:sticky;left:0;z-index:4;background:var(--theme-bg,var(--sea-deep));box-sizing:border-box;transition:background .25s,color .25s;display:flex;flex-direction:row;align-items:center;gap:8px;flex-wrap:nowrap}
-.gh-label-title{font-size:.82rem;text-transform:uppercase;letter-spacing:1.2px;font-weight:700;opacity:.85;font-family:'Jost',sans-serif;color:var(--theme-tx,#fff);white-space:nowrap;flex-shrink:0}
+.gh-label-title{font-size:.82rem;text-transform:uppercase;letter-spacing:1.2px;font-weight:700;font-family:'Jost',sans-serif;color:#fff;white-space:nowrap;flex-shrink:0}
 .gh-year-nav{display:flex;align-items:center;gap:4px;flex-shrink:0}
 .gh-yr-btn{width:20px;height:20px;border-radius:50%;border:1.5px solid rgba(255,255,255,.45);background:rgba(255,255,255,.2);cursor:pointer;color:#fff;font-size:.72rem;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:'Jost',sans-serif}
 .gh-yr-btn:hover{background:rgba(255,255,255,.45)}
@@ -403,7 +408,7 @@ select.fi{cursor:pointer}
 <body>
 
 <header>
-  <h1>✈ Mes <span>Voyages</span><span class="version">v5.7</span></h1>
+  <h1>✈ Mes <span>Voyages</span><span class="version">v5.8</span></h1>
   <div class="hr">
     <div class="vtoggle">
       <button class="vbtn active" onclick="switchView('timeline')">📅 Timeline</button>
@@ -1100,6 +1105,12 @@ function renderGantt(){
   }
 
   renderGroupPanel(groups, cy);
+
+  // Sync arrow height to actual gantt header height
+  requestAnimationFrame(()=>{
+    const head=document.querySelector('.gantt-head');
+    if(head) document.querySelector('.gwrap').style.setProperty('--head-h', head.offsetHeight+'px');
+  });
 }
 
 // ── DRAG TO SCROLL ─────────────────────────────────────────────
