@@ -42,46 +42,34 @@
   --s-confirm-bg:#e8f8f0; --s-confirm-bd:#48b87a; --s-confirm-tx:#1a6640;
   --s-cancel-bg:#fef0ee; --s-cancel-bd:#e08070; --s-cancel-tx:#903020;
   --r:12px; --sh:0 4px 24px rgba(26,95,128,.10); --sh2:0 12px 40px rgba(26,95,128,.18);
-
   /* Surface tokens — light */
-  --bg-page:    #e8f4f8;
-  --bg-card:    #ffffff;
-  --bg-card2:   #f4f8fb;
-  --bg-input:   #ffffff;
-  --bg-cell-alt:#f7fbfd;
-  --text-main:  #1a2e3a;
-  --text-mid:   #4a7080;
-  --text-light: #8aaabb;
-  --border:     #d8eaf4;
-  --border2:    #c0d8e8;
-  --row-hover:  #e8f4f8;
+  --bg-page:#e8f4f8; --bg-card:#ffffff; --bg-card2:#f4f8fb;
+  --bg-input:#ffffff; --bg-cell-alt:#f7fbfd;
+  --text-main:#1a2e3a; --text-mid:#4a7080; --text-light:#8aaabb;
+  --border:#d8eaf4; --border2:#c0d8e8; --row-hover:#e8f4f8;
+  /* Theme header colors per filter */
+  --theme-all-bg:#1a5f80; --theme-plan-bg:#7a5a00; --theme-confirm-bg:#1a5a30; --theme-cancel-bg:#7a2020;
+  /* Dur tag readable */
+  --dur-color:#1a5f80;
 }
 
 /* ── DARK MODE — Nuit Méditerranéenne ────────────────────── */
 [data-theme="dark"] {
-  --bg-page:    #0a1520;
-  --bg-card:    #112030;
-  --bg-card2:   #0d1a28;
-  --bg-input:   #152535;
-  --bg-cell-alt:#0f1d2b;
-  --text-main:  #d8eaf5;
-  --text-mid:   #7aaabb;
-  --text-light: #4a6878;
-  --border:     rgba(100,180,220,.15);
-  --border2:    rgba(100,180,220,.22);
-  --row-hover:  #152535;
-  --paper:      #112030;
-  --sand:       rgba(100,180,220,.15);
-  --sand2:      #152535;
-  --sky:        #0a1520;
-  --ink:        #d8eaf5;
-  --sea-pale:   #1a3550;
-  --sh:         0 4px 24px rgba(0,0,0,.4);
-  --sh2:        0 12px 40px rgba(0,0,0,.5);
-  --s-plan-bg:  #2a2010; --s-plan-bd:#a08020; --s-plan-tx:#d4b850;
-  --s-confirm-bg:#0a2015; --s-confirm-bd:#2a8050; --s-confirm-tx:#50c080;
-  --s-cancel-bg:#200a0a; --s-cancel-bd:#803030; --s-cancel-tx:#d06060;
-  color-scheme: dark;
+  --bg-page:#0a1520; --bg-card:#112030; --bg-card2:#0d1a28;
+  --bg-input:#152535; --bg-cell-alt:#0c1825;
+  --text-main:#d8eaf5; --text-mid:#90b8cc; --text-light:#6090a8;
+  --border:rgba(100,180,220,.18); --border2:rgba(100,180,220,.28);
+  --row-hover:#152535;
+  --paper:#112030; --sand:rgba(100,180,220,.15); --sand2:#1a2e40;
+  --sky:#0a1520; --ink:#d8eaf5; --sea-pale:#1a3550;
+  --sh:0 4px 24px rgba(0,0,0,.4); --sh2:0 12px 40px rgba(0,0,0,.5);
+  --s-plan-bg:#2a2210; --s-plan-bd:#c0a030; --s-plan-tx:#e8cc60;
+  --s-confirm-bg:#0a2518; --s-confirm-bd:#30a060; --s-confirm-tx:#60e090;
+  --s-cancel-bg:#250a0a; --s-cancel-bd:#a04040; --s-cancel-tx:#e07070;
+  /* Theme header colors per filter — dark variants */
+  --theme-all-bg:#0d2535; --theme-plan-bg:#2a2210; --theme-confirm-bg:#0a2518; --theme-cancel-bg:#250a0a;
+  --dur-color:#90b8cc;
+  color-scheme:dark;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -104,20 +92,20 @@ header h1 span{color:#f0d080}
 /* FILTER TABS */
 .fbar{display:flex;gap:0;align-items:stretch;border-bottom:none;padding:0;background:var(--bg-card);box-shadow:0 2px 8px rgba(26,95,128,.08);justify-content:space-between}
 .fbar-tabs{display:flex}
-.fbar-actions{display:flex;align-items:center;gap:6px;padding:0 12px;border-left:1px solid var(--sand)}
-.ftab{padding:10px 20px;border:none;cursor:pointer;font-family:'Jost',sans-serif;font-size:.8rem;font-weight:600;transition:all .2s;letter-spacing:.2px;border-bottom:3px solid transparent;opacity:.5;filter:saturate(.6);background:transparent}
-.ftab:hover{opacity:.8;filter:saturate(.9)}
+.fbar-actions{display:flex;align-items:center;gap:6px;padding:0 12px;border-left:1px solid var(--border)}
+.ftab{padding:10px 20px;border:none;cursor:pointer;font-family:'Jost',sans-serif;font-size:.8rem;font-weight:600;transition:all .2s;letter-spacing:.2px;border-bottom:3px solid transparent;opacity:.85;background:transparent}
+.ftab:hover{opacity:1}
 .ftab[data-f="all"]{background:var(--sea-deep);color:#fff}
 .ftab[data-f="plan"]{background:var(--s-plan-bg);color:var(--s-plan-tx)}
 .ftab[data-f="confirm"]{background:var(--s-confirm-bg);color:var(--s-confirm-tx)}
 .ftab[data-f="cancel"]{background:var(--s-cancel-bg);color:var(--s-cancel-tx)}
-.ftab.fa{opacity:1;filter:none;border-bottom:3px solid var(--sea-deep);box-shadow:0 -2px 8px rgba(26,95,128,.15)}
-.ftab.fp{opacity:1;filter:none;border-bottom:3px solid var(--s-plan-bd)}
-.ftab.fc{opacity:1;filter:none;border-bottom:3px solid var(--s-confirm-bd)}
-.ftab.fx{opacity:1;filter:none;border-bottom:3px solid var(--s-cancel-bd)}
+.ftab.fa{opacity:1;border-bottom:3px solid var(--sea-deep);box-shadow:0 -2px 8px rgba(26,95,128,.15)}
+.ftab.fp{opacity:1;border-bottom:3px solid var(--s-plan-bd)}
+.ftab.fc{opacity:1;border-bottom:3px solid var(--s-confirm-bd)}
+.ftab.fx{opacity:1;border-bottom:3px solid var(--s-cancel-bd)}
 /* Action buttons inside filter bar */
-.fbar-btn{padding:6px 12px;border-radius:8px;border:1.5px solid var(--sand);background:#fff;cursor:pointer;font-family:'Jost',sans-serif;font-size:.76rem;font-weight:500;color:var(--sea);transition:all .2s;white-space:nowrap}
-.fbar-btn:hover{background:var(--sea);color:#fff;border-color:var(--sea)}
+.fbar-btn{padding:6px 12px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg-card);cursor:pointer;font-family:'Jost',sans-serif;font-size:.76rem;font-weight:500;color:var(--ocean);transition:all .2s;white-space:nowrap}
+.fbar-btn:hover{background:var(--ocean);color:#fff;border-color:var(--ocean)}
 
 /* STATS BAR */
 .sbar{display:flex;border-bottom:1px solid rgba(26,95,128,.15);flex-wrap:wrap;background:linear-gradient(135deg,var(--sea-deep) 0%,var(--sea) 60%,var(--sea-light) 100%);align-items:stretch;position:relative;overflow:hidden}
@@ -189,11 +177,11 @@ main{padding:22px 24px}
 .ghotel{font-size:.78rem;color:var(--text-mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:italic;font-weight:500}
 .gdates-row{font-size:.74rem;color:var(--text-mid);font-weight:500;font-family:'Jost',sans-serif}
 .gmeta{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
-.gdur{font-size:.72rem;color:var(--text-light)}
+.gdur{font-size:.75rem;color:var(--dur-color);font-weight:600}
 
 /* Month cells */
 .gcols{display:flex;flex:1;position:relative}
-.gcol{width:var(--mcw,80px);min-width:var(--mcw,80px);border-right:1px solid var(--border);box-sizing:border-box;flex-shrink:0}
+.gcol{width:var(--mcw,80px);min-width:var(--mcw,80px);border-right:1px solid var(--border2);box-sizing:border-box;flex-shrink:0}
 .gcol.cur{background:rgba(100,180,220,.08)}
 
 /* Bar track */
@@ -220,7 +208,6 @@ main{padding:22px 24px}
 .cbody{display:grid;grid-template-columns:repeat(7,1fr)}
 .ccell{min-height:76px;padding:5px;border-right:1px solid var(--sand);border-bottom:1px solid var(--sand)}
 .ccell:nth-child(7n){border-right:none}
-.ccell.om{background:#f7f7f5}
 .ccell.td .cdate{background:var(--terra);color:#fff;border-radius:50%;width:23px;height:23px;display:flex;align-items:center;justify-content:center}
 .cdate{font-size:.79rem;font-weight:500;margin-bottom:3px;display:inline-block;width:23px;height:23px;line-height:23px;text-align:center}
 .cev{font-size:.67rem;padding:2px 5px;border-radius:3px;margin-bottom:2px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;display:block}
@@ -262,7 +249,7 @@ main{padding:22px 24px}
 .fr{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
 .fr.s{grid-template-columns:1fr}.fr.t{grid-template-columns:1fr 1fr 1fr}
 .fg{display:flex;flex-direction:column;gap:4px}
-.fl{font-size:.73rem;text-transform:uppercase;letter-spacing:.5px;font-weight:500;color:var(--text-light)}
+.fl{font-size:.73rem;text-transform:uppercase;letter-spacing:.5px;font-weight:600;color:var(--text-mid)}
 .fi{padding:8px 11px;border:2px solid var(--border);border-radius:8px;font-family:'Jost',sans-serif;font-size:.9rem;transition:border-color .2s;background:var(--bg-input);width:100%;color:var(--text-main)}
 .fi:focus{outline:none;border-color:var(--ocean)}
 textarea.fi{resize:vertical;min-height:68px}
@@ -317,7 +304,7 @@ select.fi{cursor:pointer}
 .dchips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
 .chip{padding:4px 11px;border-radius:20px;font-size:.76rem;font-weight:500}
 .dsec{margin-top:13px}
-.dstitle{font-size:.7rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-light);margin-bottom:5px}
+.dstitle{font-size:.7rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-mid);margin-bottom:5px;font-weight:600}
 .dsval{font-size:.88rem;line-height:1.5;color:var(--text-main)}
 .tdcard{background:var(--sand2);border-radius:8px;padding:9px 11px;margin-bottom:7px}
 .tdroute{font-weight:500;font-size:.86rem;color:var(--text-main)}
@@ -344,13 +331,13 @@ select.fi{cursor:pointer}
 .voy-stay-hd{display:flex;align-items:center;gap:8px;margin-bottom:4px}
 .voy-stay-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 .voy-stay-dest{font-weight:600;font-size:.92rem;flex:1;color:var(--text-main)}
-.voy-stay-dates{font-size:.75rem;color:var(--text-light)}
+.voy-stay-dates{font-size:.75rem;color:var(--text-mid)}
 .voy-stay-hotel{font-size:.76rem;color:var(--text-mid);font-style:italic;margin-top:2px}
 .voy-stay-svcs{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap}
 .voy-stay-svc{font-size:.72rem;background:var(--sand2);border:1px solid var(--border);color:var(--ocean);padding:1px 6px;border-radius:10px}
 .voy-divider{display:flex;align-items:center;gap:8px;padding:5px 16px;background:var(--bg-card2);border-bottom:1px solid var(--border)}
 .voy-divider-line{flex:1;height:1px;background:var(--border)}
-.voy-divider-lbl{font-size:.7rem;color:var(--text-light);text-transform:uppercase;letter-spacing:.5px}
+.voy-divider-lbl{font-size:.7rem;color:var(--text-mid);text-transform:uppercase;letter-spacing:.5px;font-weight:500}
 
 /* CHECKLIST */
 .cl-tabs{display:flex;gap:0;margin-bottom:16px;border-radius:8px;overflow:hidden;border:1.5px solid var(--border)}
@@ -368,8 +355,8 @@ select.fi{cursor:pointer}
 .cl-suggest-item:hover{background:var(--sand2)}
 .cl-items{display:flex;flex-direction:column;gap:6px;min-height:32px}
 .cl-item{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--sand2);border-radius:8px;border:1.5px solid transparent;transition:all .15s}
-.cl-item.done{background:var(--s-confirm-bg);border-color:var(--s-confirm-bd);opacity:.7}
-.cl-item.done .cl-item-text{text-decoration:line-through;color:var(--text-light)}
+.cl-item.done{background:var(--s-confirm-bg);border-color:var(--s-confirm-bd);opacity:.85}
+.cl-item.done .cl-item-text{text-decoration:line-through;color:var(--text-mid)}
 .cl-checkbox{width:18px;height:18px;border-radius:4px;border:2px solid var(--border2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.75rem;flex-shrink:0;transition:all .15s;background:var(--bg-input)}
 .cl-checkbox.checked{background:var(--forest);border-color:var(--forest);color:#fff}
 .cl-item-text{flex:1;font-size:.88rem;color:var(--text-main)}
@@ -401,13 +388,13 @@ select.fi{cursor:pointer}
 .galert-ok{background:#edfaf3;border-color:#3aad6e;color:#1e6b44}
 .galert-warn{background:#fffbea;border-color:#f0c040;color:#92710a}
 .galert-err{background:#fdecea;border-color:#c0392b;color:#922b21}
-.ggroup-stays{padding:0 16px 10px 32px;display:flex;flex-direction:column;gap:5px}
-.gstay{display:flex;align-items:center;gap:8px;font-size:.84rem;padding:4px 0;border-bottom:1px dashed var(--sand)}
+.ggroup-stays{padding:0 16px 10px 32px;display:flex;flex-direction:column;gap:5px;background:var(--bg-card)}
+.gstay{display:flex;align-items:center;gap:8px;font-size:.84rem;padding:4px 0;border-bottom:1px dashed var(--border);color:var(--text-main)}
 .gstay:last-child{border-bottom:none}
 .gstay-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.gstay-name{flex:1;font-weight:500}
-.gstay-dates{font-size:.74rem;color:#aaa}
-.gstay-hotel{font-size:.74rem;color:#aaa;font-style:italic}
+.gstay-name{flex:1;font-weight:500;color:var(--text-main)}
+.gstay-dates{font-size:.74rem;color:var(--text-mid)}
+.gstay-hotel{font-size:.74rem;color:var(--text-mid);font-style:italic}
 
 /* Alert pill on gantt row */
 .gpill{display:inline-flex;align-items:center;padding:1px 6px;border-radius:10px;font-size:.65rem;font-weight:700;margin-left:3px}
@@ -442,10 +429,10 @@ select.fi{cursor:pointer}
 .bud-total-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .bud-total{border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:2px}
 .bud-total.bconf{background:var(--s-confirm-tx)}
-.bud-total.bestim{background:var(--ink)}
-.bud-total .bud-lbl{color:rgba(255,255,255,.65)}
+.bud-total.bestim{background:var(--sea-deep)}
+.bud-total .bud-lbl{color:rgba(255,255,255,.85)}
 .bud-total .bud-val{color:#fff;font-size:1.5rem}
-.bud-total .bud-sub{color:rgba(255,255,255,.45)}
+.bud-total .bud-sub{color:rgba(255,255,255,.7)}
 
 @media(max-width:600px){
   main{padding:12px}header{padding:11px 13px}.sbar{padding:9px 13px;gap:12px}.fbar{padding:8px 13px}
@@ -456,7 +443,7 @@ select.fi{cursor:pointer}
 <body>
 
 <header>
-  <h1>✈ Mes <span>Voyages</span><span class="version">v6.0</span></h1>
+  <h1>✈ Mes <span>Voyages</span><span class="version">v6.1</span></h1>
   <div class="hr">
     <div class="vtoggle">
       <button class="vbtn active" onclick="switchView('timeline')">📅 Timeline</button>
@@ -533,7 +520,7 @@ select.fi{cursor:pointer}
 <div class="overlay" id="mtrip">
 <div class="modal">
   <div class="mhd">
-    <div class="mtitle" id="mtrip-title">Nouveau voyage</div>
+    <div class="mtitle" id="mtrip-title">Nouveau séjour</div>
     <button class="mclose" onclick="closeModal('mtrip')">✕</button>
   </div>
   <div class="mbody">
@@ -872,15 +859,20 @@ function openBudgetModal(){
 
 // ── THEME ──────────────────────────────────────────────────────
 // Per-filter theme: [bg, text-color, separator-color]
-const THEMES={
-  all:  {bg:'#1a5f80', tx:'rgba(255,255,255,.88)', sep:'rgba(255,255,255,.12)'},
-  plan: {bg:'#fff8e8', tx:'#806020',               sep:'rgba(128,96,32,.2)'},
-  confirm:{bg:'#e8f8f0', tx:'#1a6640',             sep:'rgba(26,102,64,.2)'},
-  cancel: {bg:'#fef0ee', tx:'#903020',             sep:'rgba(144,48,32,.2)'}
-};
+function getThemes(){
+  const dark=document.documentElement.dataset.theme==='dark';
+  return{
+    all:    {bg:dark?'#0d2535':'#1a5f80', tx:'rgba(255,255,255,.95)', sep:'rgba(255,255,255,.15)'},
+    plan:   {bg:dark?'#2a2210':'#7a5a00', tx:dark?'#e8cc60':'#fff8d0', sep:'rgba(255,220,100,.2)'},
+    confirm:{bg:dark?'#0a2518':'#1a5a30', tx:dark?'#60e090':'#d0ffe0', sep:'rgba(80,200,120,.2)'},
+    cancel: {bg:dark?'#250a0a':'#7a2020', tx:dark?'#e07070':'#ffe0e0', sep:'rgba(200,80,80,.2)'},
+  };
+}
+const THEMES=getThemes();
 
 function applyTheme(f){
-  const t=THEMES[f]||THEMES.all;
+  const themes=getThemes();
+  const t=themes[f]||themes.all;
   const root=document.documentElement;
   root.style.setProperty('--theme-bg', t.bg);
   root.style.setProperty('--theme-tx', t.tx);
@@ -1394,7 +1386,7 @@ function pickACH(v){document.getElementById('fho').value=v;document.getElementBy
 // ── TRIP MODAL ────────────────────────────────────────────────
 function openTripModal(id=null){
   eid=id;
-  document.getElementById('mtrip-title').textContent=id?'Modifier le voyage':'Nouveau voyage';
+  document.getElementById('mtrip-title').textContent=id?'Modifier le séjour':'Nouveau séjour';
   document.getElementById('bdel').style.display=id?'block':'none';
   // reset tab
   document.querySelectorAll('.tabbtn').forEach((b,i)=>{b.classList.toggle('active',i===0)});
@@ -1686,7 +1678,7 @@ function openVoyagesModal(highlightId=null){
       const carHtml=carRentals.map(lr=>{
         const dep=lr.dep?fdt(lr.dep):'',ret=lr.ret?fdt(lr.ret):'';
         const meta=[lr.agency,dep&&ret?`${dep} → ${ret}`:(dep||ret),lr.cost?parseFloat(lr.cost).toLocaleString('fr-FR')+' €':''].filter(Boolean).join(' · ');
-        return`<div style="display:flex;gap:6px;align-items:flex-start;margin-top:6px;padding:6px 8px;background:#f9f9f9;border-radius:6px;border:1px solid var(--sand)">
+        return`<div style="display:flex;gap:6px;align-items:flex-start;margin-top:6px;padding:6px 8px;background:var(--bg-card2);border-radius:6px;border:1px solid var(--border)">
           <span style="font-size:.9rem">🚙</span>
           <div><div style="font-size:.8rem;font-weight:500">${lr.agency||'Location voiture'}</div>
           ${meta?`<div style="font-size:.72rem;color:#aaa">${meta}</div>`:''}
@@ -2002,6 +1994,8 @@ function toggleTheme(){
   document.documentElement.dataset.theme=newTheme;
   localStorage.setItem('mv-theme',newTheme);
   document.getElementById('btn-theme').textContent=newTheme==='dark'?'☀️':'🌙';
+  applyTheme(filter);
+  render();
 }
 function initTheme(){
   const saved=localStorage.getItem('mv-theme');
