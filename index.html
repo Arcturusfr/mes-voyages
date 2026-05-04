@@ -443,7 +443,7 @@ select.fi{cursor:pointer}
 <body>
 
 <header>
-  <h1>✈ Mes <span>Voyages</span><span class="version">v6.1</span></h1>
+  <h1>✈ Mes <span>Voyages</span><span class="version">v6.2</span></h1>
   <div class="hr">
     <div class="vtoggle">
       <button class="vbtn active" onclick="switchView('timeline')">📅 Timeline</button>
@@ -1602,7 +1602,7 @@ function openDetail(id){
     <div class="ddates">${fd(t.start)} → ${fd(t.end)}</div>
     <div class="dchips">${badge(t.status||'plan')}
       <div class="chip" style="background:${t.color}22;color:${t.color}">✈ ${dur} jour${dur>1?'s':''}</div>
-      ${t.hotel?`<div class="chip" style="background:#f5f5f5">🏨 ${t.hotel}</div>`:''}
+      ${t.hotel?`<div class="chip" style="background:var(--bg-card2);color:var(--text-main);border:1px solid var(--border)">🏨 ${t.hotel}</div>`:''}
       ${tot?`<div class="chip" style="background:#fff8e1;color:#b8860b">💰 ${tot.toLocaleString('fr-FR')} €</div>`:''}
     </div>
     ${(t.hotelSvcs||[]).length?`<div class="dsec"><div class="dstitle">Services hébergement</div><div style="margin-top:4px">${
