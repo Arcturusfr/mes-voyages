@@ -443,7 +443,7 @@ select.fi{cursor:pointer}
 <body>
 
 <header>
-  <h1>✈ Mes <span>Voyages</span><span class="version">v6.3</span></h1>
+  <h1>✈ Mes <span>Voyages</span><span class="version">v6.4</span></h1>
   <div class="hr">
     <div class="vtoggle">
       <button class="vbtn active" onclick="switchView('timeline')">📅 Timeline</button>
@@ -456,19 +456,6 @@ select.fi{cursor:pointer}
     <button class="badd" onclick="openTripModal()">＋ Ajouter</button>
   </div>
 </header>
-
-<div class="fbar">
-  <div class="fbar-tabs">
-    <button class="ftab fa" data-f="all" onclick="setFilter('all',this)">Tous</button>
-    <button class="ftab" data-f="plan" onclick="setFilter('plan',this)">? Envisagés</button>
-    <button class="ftab" data-f="confirm" onclick="setFilter('confirm',this)">✓ Confirmés</button>
-    <button class="ftab" data-f="cancel" onclick="setFilter('cancel',this)">✕ Annulés</button>
-  </div>
-  <div class="fbar-actions">
-    <button class="fbar-btn" id="btn-ctrl" onclick="toggleCtrlPanel()">🔍 Contrôle</button>
-    <button class="fbar-btn" onclick="openVoyagesModal()">✈ Voyages</button>
-  </div>
-</div>
 
 <div class="sbar">
   <div class="sbar-left tc-all" id="sbar-left">
@@ -484,6 +471,19 @@ select.fi{cursor:pointer}
       <span class="stv" id="s4">—</span><span class="stl">Budget estimé ›</span>
     </div>
     <div class="st"><span class="stv" id="s5">—</span><span class="stl">Prochain séjour</span></div>
+  </div>
+</div>
+
+<div class="fbar">
+  <div class="fbar-tabs">
+    <button class="ftab fa" data-f="all" onclick="setFilter('all',this)">Tous</button>
+    <button class="ftab" data-f="plan" onclick="setFilter('plan',this)">? Envisagés</button>
+    <button class="ftab" data-f="confirm" onclick="setFilter('confirm',this)">✓ Confirmés</button>
+    <button class="ftab" data-f="cancel" onclick="setFilter('cancel',this)">✕ Annulés</button>
+  </div>
+  <div class="fbar-actions">
+    <button class="fbar-btn" id="btn-ctrl" onclick="toggleCtrlPanel()">🔍 Contrôle</button>
+    <button class="fbar-btn" onclick="openVoyagesModal()">✈ Voyages</button>
   </div>
 </div>
 
