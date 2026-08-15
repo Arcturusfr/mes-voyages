@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Mes Voyages</title>
+
+<!-- PWA Meta -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mes Voyages">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="description" content="Planificateur de voyages personnel">
+
+<!-- PWA Manifest (inline via data URI) -->
+<link rel="manifest" href="data:application/json;charset=utf-8,{
+  %22name%22:%22Mes%20Voyages%22,
+  %22short_name%22:%22Voyages%22,
+  %22description%22:%22Planificateur%20de%20voyages%20personnel%22,
+  %22start_url%22:%22.%2Findex.html%22,
+  %22display%22:%22standalone%22,
+  %22orientation%22:%22portrait%22,
+  %22background_color%22:%22%231a1a2e%22,
+  %22theme_color%22:%22%231a1a2e%22,
+  %22icons%22:[
+    {%22src%22:%22data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20512%20512'%3E%3Crect%20width%3D'512'%20height%3D'512'%20rx%3D'80'%20fill%3D'%231a1a2e'%2F%3E%3Ctext%20x%3D'256'%20y%3D'340'%20font-size%3D'300'%20text-anchor%3D'middle'%3E%E2%9C%88%3C%2Ftext%3E%3C%2Fsvg%3E%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22}
+  ]
+}">
+
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%231a1a2e'/><text x='256' y='340' font-size='300' text-anchor='middle'>✈</text></svg>">
+
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header>
+  <h1>✈ Mes <span>Voyages</span><span class="version">v6.4</span></h1>
+  <div class="hr">
+    <div class="vtoggle">
+      <button class="vbtn active" onclick="switchView('timeline')">📅 Timeline</button>
+      <button class="vbtn" onclick="switchView('calendar')">🗓 Calendrier</button>
+    </div>
+    <button class="bio" id="btn-theme" onclick="toggleTheme()" title="Mode sombre/clair">🌙</button>
+    <button class="bio" onclick="exportData()">⬇ Exporter</button>
+    <button class="bio" onclick="document.getElementById('imp').click()">⬆ Importer</button>
+    <input type="file" id="imp" accept=".json" style="display:none" onchange="importData(event)">
+    <button class="badd" onclick="openTripModal()">＋ Ajouter</button>
+  </div>
+</header>
+
+<div class="sbar">
+  <div class="sbar-left tc-all" id="sbar-left">
+    <div class="st"><span class="stv" id="s1">0</span><span class="stl">Séjours</span></div>
+    <div class="st"><span class="stv" id="s2">0</span><span class="stl">Jours</span></div>
+  </div>
+  <div class="sbar-sep"></div>
+  <div class="sbar-right">
+    <div class="st bud-clickable" onclick="openBudgetModal()" title="Détail du budget">
+      <span class="stv" id="s3">—</span><span class="stl">Budget confirmé ›</span>
+    </div>
+    <div class="st bud-clickable" onclick="openBudgetModal()" title="Détail du budget">
+      <span class="stv" id="s4">—</span><span class="stl">Budget estimé ›</span>
+    </div>
+    <div class="st"><span class="stv" id="s5">—</span><span class="stl">Prochain séjour</span></div>
+  </div>
+</div>
+
+<div class="fbar">
+  <div class="fbar-tabs">
+    <button class="ftab fa" data-f="all"     onclick="setFilter('all',this)">Tous</button>
+    <button class="ftab"    data-f="plan"    onclick="setFilter('plan',this)">? Envisagés</button>
+    <button class="ftab"    data-f="confirm" onclick="setFilter('confirm',this)">✓ Confirmés</button>
+    <button class="ftab"    data-f="cancel"  onclick="setFilter('cancel',this)">✕ Annulés</button>
+  </div>
+  <div class="fbar-actions">
+    <button class="fbar-btn" id="btn-ctrl" onclick="toggleCtrlPanel()">🔍 Contrôle</button>
+    <button class="fbar-btn" onclick="openVoyagesModal()">✈ Voyages</button>
+  </div>
+</div>
+
+<main>
+  <div class="view active" id="vt">
+    <div class="gwrap">
+      <button class="gscroll-arrow left"  onclick="shiftMonths(-1)">‹</button>
+      <button class="gscroll-arrow right" onclick="shiftMonths(1)">›</button>
+      <div class="gscroll" id="gscroll"><div id="gantt"></div></div>
+    </div>
+  </div>
+
+  <div class="view" id="vc">
+    <div class="ch">
+      <div class="cnav">
+        <button class="nbtn" onclick="changeMonth(-1)">‹</button>
+        <div class="ctitle" id="ctitle"></div>
+        <button class="nbtn" onclick="changeMonth(1)">›</button>
+      </div>
+    </div>
+    <div class="cgrid">
+      <div class="cdh">
+        <div class="cdn">Lun</div><div class="cdn">Mar</div><div class="cdn">Mer</div>
+        <div class="cdn">Jeu</div><div class="cdn">Ven</div><div class="cdn">Sam</div><div class="cdn">Dim</div>
+      </div>
+      <div class="cbody" id="cbody"></div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<!-- ══ TRIP MODAL ══════════════════════════════════════════════ -->
+<div class="overlay" id="mtrip">
+<div class="modal">
+  <div class="mhd">
+    <div class="mtitle" id="mtrip-title">Nouveau séjour</div>
+    <button class="mclose" onclick="closeModal('mtrip')">✕</button>
+  </div>
+  <div class="mbody">
+    <div class="tabbar">
+      <button class="tabbtn active" data-tab="ti">🏖 Séjour</button>
+      <button class="tabbtn" data-tab="tt">🚆 Transports</button>
+      <button class="tabbtn" data-tab="tl">🚙 Location</button>
+    </div>
+
+    <div class="tabpane active" id="ti">
+      <div class="fr s">
+        <div class="fg">
+          <label class="fl">🌍 Destination *</label>
+          <div class="acw">
+            <input class="fi" id="fd" placeholder="Paris, Tokyo…" autocomplete="off"
+              oninput="showAC(this.value)" onblur="hideAC()" onfocus="showAC(this.value)">
+            <div class="aclist" id="acl" style="display:none"></div>
+          </div>
+        </div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label class="fl">📅 Début *</label><input class="fi" id="fst" type="date"></div>
+        <div class="fg"><label class="fl">📅 Fin *</label><input class="fi" id="fen" type="date"></div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label class="fl">🏨 Hébergement</label>
+          <div class="acw">
+            <input class="fi" id="fho" placeholder="Hôtel, Airbnb…" autocomplete="off"
+              oninput="showACH(this.value)" onblur="hideACH()" onfocus="showACH(this.value)">
+            <div class="aclist" id="aclh" style="display:none"></div>
+          </div>
+        </div>
+        <div class="fg"><label class="fl">💰 Budget héberg. (€)</label><input class="fi" id="fbu" type="number" placeholder="0"></div>
+      </div>
+      <div class="fr s">
+        <div class="fg">
+          <label class="fl">🛎 Services hébergement</label>
+          <div class="hsvc-row" id="fhsvc"></div>
+        </div>
+      </div>
+      <div class="fr s">
+        <div class="fg"><label class="fl">📌 Notes hébergement</label><input class="fi" id="fhno" placeholder="Numéro de réservation, code wifi…"></div>
+      </div>
+      <div class="fr s">
+        <div class="fg"><label class="fl">🗺 Activités / étapes</label><textarea class="fi" id="fac" placeholder="Visite du Louvre…"></textarea></div>
+      </div>
+      <div class="fr s">
+        <div class="fg"><label class="fl">📝 Notes</label><textarea class="fi" id="fno" placeholder="Infos pratiques…"></textarea></div>
+      </div>
+      <div class="fr">
+        <div class="fg">
+          <label class="fl">📊 Statut du voyage</label>
+          <div class="srow" id="tsr">
+            <div class="sopt op sel" data-v="plan"    onclick="selTripSt('plan')">? Envisagé</div>
+            <div class="sopt oc"     data-v="confirm" onclick="selTripSt('confirm')">✓ Confirmé</div>
+            <div class="sopt ox"     data-v="cancel"  onclick="selTripSt('cancel')">✕ Annulé</div>
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fl">🎨 Couleur</label>
+          <div class="crow" id="cpick"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabpane" id="tt">
+      <div class="tlist" id="tlist"></div>
+      <button class="batr" onclick="openTF()">＋ Ajouter un trajet</button>
+      <div class="tform" id="tform">
+        <div style="font-weight:500;font-size:.86rem;margin-bottom:11px" id="tftitle">Nouveau trajet</div>
+        <div class="fr">
+          <div class="fg"><label class="fl">Type</label>
+            <select class="fi" id="tft">
+              <option value="avion">✈ Avion</option><option value="train">🚆 Train</option>
+              <option value="voiture">🚗 Voiture</option><option value="ferry">⛴ Ferry</option>
+              <option value="bus">🚌 Bus</option><option value="autre">🔵 Autre</option>
+            </select></div>
+          <div class="fg"><label class="fl">Compagnie / Moyen</label><input class="fi" id="tfc" placeholder="Air France, SNCF…"></div>
+        </div>
+        <div class="fr">
+          <div class="fg"><label class="fl">Départ (ville/gare)</label><input class="fi" id="tff" placeholder="Paris CDG"></div>
+          <div class="fg"><label class="fl">Arrivée (ville/gare)</label><input class="fi" id="tfto" placeholder="Tokyo NRT"></div>
+        </div>
+        <div class="fr">
+          <div class="fg"><label class="fl">Date &amp; heure départ</label><input class="fi" id="tfdp" type="datetime-local"></div>
+          <div class="fg"><label class="fl">Date &amp; heure arrivée</label><input class="fi" id="tfar" type="datetime-local"></div>
+        </div>
+        <div class="fr">
+          <div class="fg"><label class="fl">N° vol / train / résa</label><input class="fi" id="tfrf" placeholder="AF0074"></div>
+          <div class="fg"><label class="fl">Coût (€)</label><input class="fi" id="tfco" type="number" placeholder="0"></div>
+        </div>
+        <div class="fr s">
+          <div class="fg"><label class="fl">Statut</label>
+            <div class="srow" id="tfsr">
+              <div class="sopt op sel" data-v="plan"    onclick="selTfSt('plan')">? Envisagé</div>
+              <div class="sopt oc"     data-v="confirm" onclick="selTfSt('confirm')">✓ Confirmé</div>
+              <div class="sopt ox"     data-v="cancel"  onclick="selTfSt('cancel')">✕ Annulé</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:9px">
+          <button class="bcanc" onclick="cancelTF()">Annuler</button>
+          <button class="bsave" onclick="saveTF()">Ajouter</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB LOCATION -->
+    <div class="tabpane" id="tl">
+      <div class="tlist" id="llist"></div>
+      <button class="batr" onclick="openLF()">＋ Ajouter une location</button>
+      <div class="tform" id="lform">
+        <div style="font-weight:500;font-size:.86rem;margin-bottom:11px" id="lftitle">Nouvelle location</div>
+        <div class="fr s">
+          <div class="fg"><label class="fl">🏢 Agence</label><input class="fi" id="lfa" placeholder="Hertz, Europcar, Avis…"></div>
+        </div>
+        <div class="fr">
+          <div class="fg"><label class="fl">📅 Prise en charge</label><input class="fi" id="lfd" type="datetime-local"></div>
+          <div class="fg"><label class="fl">📅 Restitution</label><input class="fi" id="lfr" type="datetime-local"></div>
+        </div>
+        <div class="fr">
+          <div class="fg"><label class="fl">💰 Coût (€)</label><input class="fi" id="lfc" type="number" placeholder="0"></div>
+          <div class="fg">
+            <label class="fl">Statut</label>
+            <div class="srow" id="lfsr">
+              <div class="sopt op sel" data-v="plan"    onclick="selLfSt('plan')">? Envisagé</div>
+              <div class="sopt oc"     data-v="confirm" onclick="selLfSt('confirm')">✓ Confirmé</div>
+              <div class="sopt ox"     data-v="cancel"  onclick="selLfSt('cancel')">✕ Annulé</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:9px">
+          <button class="bcanc" onclick="cancelLF()">Annuler</button>
+          <button class="bsave" onclick="saveLF()">Ajouter</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="factions">
+      <button class="bdel" id="bdel" onclick="deleteTrip()" style="display:none">🗑 Supprimer</button>
+      <button class="bcanc" onclick="closeModal('mtrip')">Annuler</button>
+      <button class="bsave" onclick="saveTrip()">Enregistrer le voyage</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ DETAIL MODAL ════════════════════════════════════════════ -->
+<div class="overlay" id="mdet">
+<div class="modal" style="max-width:490px">
+  <div class="mhd"><div></div><button class="mclose" onclick="closeModal('mdet')">✕</button></div>
+  <div class="mbody" id="detbody"></div>
+</div>
+</div>
+
+<!-- ══ CONTRÔLE MODAL ══════════════════════════════════════════ -->
+<div class="overlay" id="mctrl">
+<div class="modal" style="max-width:560px">
+  <div class="mhd">
+    <div class="mtitle">🔍 Contrôle</div>
+    <button class="mclose" onclick="closeModal('mctrl')">✕</button>
+  </div>
+  <div class="mbody" id="gpanel-wrap"></div>
+</div>
+</div>
+
+<!-- ══ BUDGET MODAL ════════════════════════════════════════════ -->
+<div class="overlay" id="mbudget">
+<div class="modal" style="max-width:460px">
+  <div class="mhd">
+    <div class="mtitle">💰 Détail du budget</div>
+    <button class="mclose" onclick="closeModal('mbudget')">✕</button>
+  </div>
+  <div class="mbody" id="budget-body"></div>
+</div>
+</div>
+
+<!-- ══ VOYAGES MODAL ═══════════════════════════════════════════ -->
+<div class="overlay" id="mvoyages">
+<div class="modal" style="max-width:580px">
+  <div class="mhd">
+    <div class="mtitle">✈ Voyages</div>
+    <button class="mclose" onclick="closeModal('mvoyages')">✕</button>
+  </div>
+  <div class="mbody" id="voyages-body"></div>
+</div>
+</div>
+
+<!-- ══ CHECKLIST MODAL ════════════════════════════════════════ -->
+<div class="overlay" id="mchecklist">
+<div class="modal" style="max-width:540px">
+  <div class="mhd">
+    <div class="mtitle">✅ Check-list</div>
+    <button class="mclose" onclick="closeModal('mchecklist')">✕</button>
+  </div>
+  <div class="mbody" id="checklist-body"></div>
+</div>
+</div>
+
+<!-- ══ SCRIPTS — chargés dans l'ordre de dépendance ══════════ -->
+<script src="js/constants.js"></script>
+<script src="js/state.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/stats.js"></script>
+<script src="js/groups.js"></script>
+<script src="js/gantt.js"></script>
+<script src="js/calendar.js"></script>
+<script src="js/trips.js"></script>
+<script src="js/detail.js"></script>
+<script src="js/checklist.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
