@@ -321,6 +321,15 @@ select.fi{cursor:pointer}
 .cl-item-cat.actions{background:var(--s-cancel-bg);color:var(--s-cancel-tx);border:1px solid var(--s-cancel-bd)}
 .cl-item-del{background:none;border:none;cursor:pointer;color:var(--text-light);font-size:.85rem;padding:2px 4px;border-radius:4px;transition:color .15s}
 .cl-item-del:hover{color:#c0392b}
+.cl-item-handle{cursor:grab;color:var(--text-light);font-size:.9rem;padding:0 2px;flex-shrink:0;user-select:none;line-height:1}
+.cl-item-handle:active{cursor:grabbing}
+.cl-item.dragging{opacity:.4}
+.cl-item.drag-over{border-color:var(--ocean);background:var(--sky)}
+.cl-item-moves{display:flex;flex-direction:column;gap:1px;flex-shrink:0}
+.cl-item-move{border:none;background:none;cursor:pointer;font-size:.6rem;line-height:1;color:var(--text-light);padding:1px 3px;border-radius:3px;transition:color .15s}
+.cl-item-move-up{font-size:.78rem}
+.cl-item-move:hover:not(:disabled){color:var(--ocean)}
+.cl-item-move:disabled{color:var(--border2);cursor:default}
 .cl-footer{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:12px;border-top:1px solid var(--sand)}
 .cl-progress{font-size:.8rem;color:#888}
 .cl-progress strong{color:var(--ocean)}
