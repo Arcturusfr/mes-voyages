@@ -76,7 +76,7 @@ function renderChecklist() {
             <span class="cl-item-text">${item.text}</span>
             <span class="cl-item-cat ${cat}">${catIcon}</span>
             <div class="cl-item-moves">
-              <button class="cl-item-move" onclick="moveClItem(${i},-1)" ${i === 0 ? 'disabled' : ''} title="Monter">▲</button>
+              <button class="cl-item-move cl-item-move-up" onclick="moveClItem(${i},-1)" ${i === 0 ? 'disabled' : ''} title="Monter">▲</button>
               <button class="cl-item-move" onclick="moveClItem(${i},1)" ${i === items.length - 1 ? 'disabled' : ''} title="Descendre">▼</button>
             </div>
             <button class="cl-item-del" onclick="deleteClItem(${i})">✕</button>
