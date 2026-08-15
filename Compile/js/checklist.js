@@ -68,10 +68,17 @@ function renderChecklist() {
       <div class="cl-section-title">${catLabel} — ${total} item${total !== 1 ? 's' : ''}</div>
       <div class="cl-items">
         ${items.length ? items.map((item, i) => `
-          <div class="cl-item ${item.checked ? 'done' : ''}">
+          <div class="cl-item ${item.checked ? 'done' : ''}" draggable="true"
+            ondragstart="clDragStart(${i}, event)" ondragover="clDragOver(${i}, event)"
+            ondragleave="clDragLeave(event)" ondrop="clDrop(${i}, event)" ondragend="clDragEnd(event)">
+            <span class="cl-item-handle" title="Glisser pour réordonner">⠿</span>
             <div class="cl-checkbox ${item.checked ? 'checked' : ''}" onclick="toggleClItem(${i})">${item.checked ? '✓' : ''}</div>
             <span class="cl-item-text">${item.text}</span>
             <span class="cl-item-cat ${cat}">${catIcon}</span>
+            <div class="cl-item-moves">
+              <button class="cl-item-move" onclick="moveClItem(${i},-1)" ${i === 0 ? 'disabled' : ''} title="Monter">▲</button>
+              <button class="cl-item-move" onclick="moveClItem(${i},1)" ${i === items.length - 1 ? 'disabled' : ''} title="Descendre">▼</button>
+            </div>
             <button class="cl-item-del" onclick="deleteClItem(${i})">✕</button>
           </div>`).join('')
         : `<div style="color:#ccc;font-size:.83rem;text-align:center;padding:16px 0">Liste vide — ajoutez des items !</div>`}
@@ -113,6 +120,46 @@ function deleteClItem(i) {
   const cl = getVoyageChecklist();
   cl[clActiveCat].splice(i, 1);
   saveVoyageChecklist(cl); renderChecklist();
+}
+
+// ── CHECKLIST TRI MANUEL ──────────────────────────────────────
+function moveClItem(i, dir) {
+  const cl  = getVoyageChecklist();
+  const arr = cl[clActiveCat];
+  const j   = i + dir;
+  if (j < 0 || j >= arr.length) return;
+  [arr[i], arr[j]] = [arr[j], arr[i]];
+  saveVoyageChecklist(cl); renderChecklist();
+}
+
+let clDragIndex = null;
+function clDragStart(i, ev) {
+  clDragIndex = i;
+  ev.dataTransfer.effectAllowed = 'move';
+  ev.currentTarget.classList.add('dragging');
+}
+function clDragOver(i, ev) {
+  ev.preventDefault();
+  ev.dataTransfer.dropEffect = 'move';
+  if (clDragIndex !== null && clDragIndex !== i) ev.currentTarget.classList.add('drag-over');
+}
+function clDragLeave(ev) {
+  ev.currentTarget.classList.remove('drag-over');
+}
+function clDrop(i, ev) {
+  ev.preventDefault();
+  ev.currentTarget.classList.remove('drag-over');
+  if (clDragIndex === null || clDragIndex === i) return;
+  const cl  = getVoyageChecklist();
+  const arr = cl[clActiveCat];
+  const [moved] = arr.splice(clDragIndex, 1);
+  arr.splice(i, 0, moved);
+  clDragIndex = null;
+  saveVoyageChecklist(cl); renderChecklist();
+}
+function clDragEnd(ev) {
+  clDragIndex = null;
+  if (ev.currentTarget) ev.currentTarget.classList.remove('dragging');
 }
 
 function resetChecklist() {
