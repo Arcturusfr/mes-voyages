@@ -1,15 +1,22 @@
+// v2026-08-16_21h39 — modifs Claude : checklist — pliage/dépliage des catégories (chevron)
 // ── CHECKLIST ─────────────────────────────────────────────────
 let clAddTargetCat     = null;
 let clNewCatOpen        = false;
 let clRenameCatId       = null;
 let clConfirmDeleteCat  = null;
 let clConfirmClear      = false;
+let clCollapsedCats     = new Set();
+
+function toggleCatCollapse(id) {
+  if (clCollapsedCats.has(id)) clCollapsedCats.delete(id); else clCollapsedCats.add(id);
+  renderChecklist();
+}
 
 function openChecklistModal(groupIds) {
   clVoyageId    = groupIds;
   clActiveCat   = 'bagages';
   clAddTargetCat = null;
-  clNewCatOpen = false; clRenameCatId = null; clConfirmDeleteCat = null; clConfirmClear = false;
+  clNewCatOpen = false; clRenameCatId = null; clConfirmDeleteCat = null; clConfirmClear = false; clCollapsedCats = new Set();
   renderChecklist();
   document.getElementById('mchecklist').classList.add('open');
 }
@@ -100,17 +107,19 @@ function renderChecklist() {
 
     ${cats.map((c, ci) => {
       const cDone = c.items.filter(i => i.checked).length;
+      const collapsed = clCollapsedCats.has(c.id);
       return `
       <div class="cl-cat-block">
         <div class="cl-cat-header ${cats.length > 1 ? '' : 'cl-cat-header-solo'}" draggable="true"
           ondragstart="clCatDragStart(${ci}, event)" ondragover="clCatDragOver(${ci}, event)"
           ondragleave="clCatDragLeave(event)" ondrop="clCatDrop(${ci}, event)" ondragend="clCatDragEnd(event)">
           <span class="cl-item-handle" title="Glisser pour réordonner">⠿</span>
+          <span class="cl-cat-chevron" onclick="toggleCatCollapse('${c.id}')" title="${collapsed ? 'Déplier' : 'Replier'}">${collapsed ? '▸' : '▾'}</span>
           ${c.id === clRenameCatId ? `
           <input class="cl-cat-rename-input" id="cl-rename-input-${ci}" value="${c.name.replace(/"/g,'&quot;')}" autocomplete="off"
             onkeydown="if(event.key==='Enter')confirmRenameCat(${ci}); if(event.key==='Escape'){clRenameCatId=null;renderChecklist();}"
             onblur="confirmRenameCat(${ci})">
-          ` : `<span class="cl-cat-name">${c.name}</span>`}
+          ` : `<span class="cl-cat-name" onclick="toggleCatCollapse('${c.id}')">${c.name}</span>`}
           <span class="cl-cat-count">${cDone > 0 ? `${cDone}/` : ''}${c.items.length}</span>
           <div class="cl-item-moves">
             <button class="cl-item-move" onclick="moveClCategory(${ci},-1)" ${ci === 0 ? 'disabled' : ''} title="Monter">▲</button>
@@ -122,6 +131,7 @@ function renderChecklist() {
             <button class="cl-cat-edit" onclick="clConfirmDeleteCat=null;renderChecklist()" title="Annuler">↩</button>
           ` : `<button class="cl-item-del" onclick="clConfirmDeleteCat='${c.id}';renderChecklist()" title="Supprimer la catégorie">✕</button>`}
         </div>
+        ${collapsed ? '' : `
         <div class="cl-items">
           ${c.items.length ? c.items.map((item, i) => `
             <div class="cl-item ${item.checked ? 'done' : ''}" draggable="true"
@@ -141,7 +151,7 @@ function renderChecklist() {
               <button class="cl-item-del" onclick="deleteClItem(${ci}, ${i})">✕</button>
             </div>`).join('')
           : `<div class="cl-cat-empty">Catégorie vide</div>`}
-        </div>
+        </div>`}
       </div>`;
     }).join('')}
 
