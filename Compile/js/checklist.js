@@ -343,24 +343,32 @@ function clearChecklist() {
 }
 
 function loadTemplate(cat) {
-  const tpl = JSON.parse(localStorage.getItem('mv-cl-tpl-' + cat) || '[]');
-  if (!tpl.length) { showToast('Aucun modèle sauvegardé pour cette catégorie.'); return; }
+  const raw = JSON.parse(localStorage.getItem('mv-cl-tpl-' + cat) || 'null');
+  if (!raw || !raw.length) { showToast('Aucun modèle sauvegardé pour cette catégorie.'); return; }
+  // Migration : les anciens modèles étaient une simple liste de textes.
+  const tpl = (typeof raw[0] === 'string') ? [{ name: 'Divers', items: raw }] : raw;
   const cl   = getVoyageChecklist();
   const cats = cl[cat];
-  const existing = new Set(cats.flatMap(c => c.items.map(i => i.text)));
-  const target = cats.find(c => c.name === 'Divers') || cats[0];
   let added = 0;
-  tpl.forEach(text => { if (!existing.has(text)) { target.items.push({ text, checked: false }); added++; } });
+  tpl.forEach(tc => {
+    let target = cats.find(c => c.name.toLowerCase() === tc.name.toLowerCase());
+    if (!target) { target = { id: newClCatId(), name: tc.name, items: [] }; cats.push(target); }
+    const existing = new Set(target.items.map(i => i.text));
+    tc.items.forEach(text => {
+      if (!existing.has(text)) { target.items.push({ text, checked: false }); existing.add(text); added++; }
+    });
+  });
   saveVoyageChecklist(cl); renderChecklist();
-  showToast(`✅ ${added} item(s) chargés depuis le modèle`);
+  showToast(`✅ ${added} item(s) chargés depuis le modèle (${tpl.length} catégorie(s))`);
 }
 
 function saveAsTemplate(cat) {
-  const cl    = getVoyageChecklist();
-  const items = cl[cat].flatMap(c => c.items.map(i => i.text));
-  if (!items.length) { showToast('La liste est vide.'); return; }
-  localStorage.setItem('mv-cl-tpl-' + cat, JSON.stringify(items));
-  showToast(`💾 Modèle sauvegardé (${items.length} item(s))`);
+  const cl  = getVoyageChecklist();
+  const tpl = cl[cat].filter(c => c.items.length > 0).map(c => ({ name: c.name, items: c.items.map(i => i.text) }));
+  if (!tpl.length) { showToast('La liste est vide.'); return; }
+  localStorage.setItem('mv-cl-tpl-' + cat, JSON.stringify(tpl));
+  const total = tpl.reduce((n, c) => n + c.items.length, 0);
+  showToast(`💾 Modèle sauvegardé (${tpl.length} catégorie(s), ${total} item(s))`);
 }
 
 // ── CHECKLIST AUTOCOMPLETE ────────────────────────────────────
