@@ -345,6 +345,8 @@ select.fi{cursor:pointer}
 .cl-cat-add-btn:hover{border-color:var(--ocean);color:var(--ocean)}
 .cl-add-cat-select{padding:9px 8px;border:2px solid var(--border);border-radius:8px;font-family:'Jost',sans-serif;font-size:.82rem;background:var(--bg-input);color:var(--text-main);max-width:110px}
 .cl-item-movecat{font-size:.76rem;padding:3px 4px;border:1.5px solid var(--border);border-radius:6px;background:var(--bg-input);color:var(--text-mid);max-width:92px;flex-shrink:0}
+.cl-cat-rename-input{flex:1;padding:3px 8px;border:1.5px solid var(--ocean);border-radius:5px;font-family:'Jost',sans-serif;font-size:.78rem;font-weight:600;background:var(--bg-input);color:var(--text-main);text-transform:none;letter-spacing:0}
+.cl-confirm-del{color:#c0392b;font-weight:700}
 .cl-footer{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:12px;border-top:1px solid var(--sand)}
 .cl-progress{font-size:.8rem;color:#888}
 .cl-progress strong{color:var(--ocean)}
