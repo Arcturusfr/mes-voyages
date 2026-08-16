@@ -1,10 +1,15 @@
 // ── CHECKLIST ─────────────────────────────────────────────────
-let clAddTargetCat = null;
+let clAddTargetCat     = null;
+let clNewCatOpen        = false;
+let clRenameCatId       = null;
+let clConfirmDeleteCat  = null;
+let clConfirmClear      = false;
 
 function openChecklistModal(groupIds) {
   clVoyageId    = groupIds;
   clActiveCat   = 'bagages';
   clAddTargetCat = null;
+  clNewCatOpen = false; clRenameCatId = null; clConfirmDeleteCat = null; clConfirmClear = false;
   renderChecklist();
   document.getElementById('mchecklist').classList.add('open');
 }
@@ -53,8 +58,6 @@ function renderChecklist() {
     surSoi: { label:'👜 Sur soi',                  icon:'👜', css:'surSoi' },
     actions:{ label:'⚡ À faire avant de partir',  icon:'⚡', css:'actions' },
   };
-  const otherCats = Object.keys(CAT_META).filter(c => c !== cat && (cl[c] || []).some(sc => sc.items.length > 0));
-
   if (!clAddTargetCat || !cats.some(c => c.id === clAddTargetCat)) clAddTargetCat = cats[0].id;
 
   const ids = clVoyageId.split(',');
@@ -74,7 +77,6 @@ function renderChecklist() {
     <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
       <button class="cl-template-btn" onclick="loadTemplate('${cat}')">📋 Charger modèle</button>
       <button class="cl-template-btn" onclick="saveAsTemplate('${cat}')">💾 Sauver comme modèle</button>
-      ${otherCats.map(c => `<button class="cl-template-btn" onclick="copyFromOtherCat('${c}')">↕ Copier depuis ${CAT_META[c].icon}</button>`).join('')}
     </div>
     <div class="cl-add-row">
       <input class="cl-add-input" id="cl-input" placeholder="Ajouter un item…" autocomplete="off"
@@ -95,14 +97,21 @@ function renderChecklist() {
           ondragstart="clCatDragStart(${ci}, event)" ondragover="clCatDragOver(${ci}, event)"
           ondragleave="clCatDragLeave(event)" ondrop="clCatDrop(${ci}, event)" ondragend="clCatDragEnd(event)">
           <span class="cl-item-handle" title="Glisser pour réordonner">⠿</span>
-          <span class="cl-cat-name">${c.name}</span>
+          ${c.id === clRenameCatId ? `
+          <input class="cl-cat-rename-input" id="cl-rename-input-${ci}" value="${c.name.replace(/"/g,'&quot;')}" autocomplete="off"
+            onkeydown="if(event.key==='Enter')confirmRenameCat(${ci}); if(event.key==='Escape'){clRenameCatId=null;renderChecklist();}"
+            onblur="confirmRenameCat(${ci})">
+          ` : `<span class="cl-cat-name">${c.name}</span>`}
           <span class="cl-cat-count">${cDone > 0 ? `${cDone}/` : ''}${c.items.length}</span>
           <div class="cl-item-moves">
             <button class="cl-item-move" onclick="moveClCategory(${ci},-1)" ${ci === 0 ? 'disabled' : ''} title="Monter">▲</button>
             <button class="cl-item-move cl-item-move-down" onclick="moveClCategory(${ci},1)" ${ci === cats.length - 1 ? 'disabled' : ''} title="Descendre">▼</button>
           </div>
-          <button class="cl-cat-edit" onclick="renameClCategory(${ci})" title="Renommer la catégorie">✎</button>
-          <button class="cl-item-del" onclick="deleteClCategory(${ci})" title="Supprimer la catégorie">✕</button>
+          ${c.id !== clRenameCatId ? `<button class="cl-cat-edit" onclick="toggleRenameCat('${c.id}')" title="Renommer la catégorie">✎</button>` : ''}
+          ${clConfirmDeleteCat === c.id ? `
+            <button class="cl-item-del cl-confirm-del" onclick="deleteClCategory(${ci})" title="Confirmer la suppression">✓</button>
+            <button class="cl-cat-edit" onclick="clConfirmDeleteCat=null;renderChecklist()" title="Annuler">↩</button>
+          ` : `<button class="cl-item-del" onclick="clConfirmDeleteCat='${c.id}';renderChecklist()" title="Supprimer la catégorie">✕</button>`}
         </div>
         <div class="cl-items">
           ${c.items.length ? c.items.map((item, i) => `
@@ -127,18 +136,31 @@ function renderChecklist() {
       </div>`;
     }).join('')}
 
-    <button class="cl-cat-add-btn" onclick="addClCategory()">＋ Nouvelle catégorie</button>
+    ${clNewCatOpen ? `
+    <div class="cl-add-row">
+      <input class="cl-add-input" id="cl-newcat-input" placeholder="Nom de la catégorie…" autocomplete="off"
+        onkeydown="if(event.key==='Enter')confirmNewCat(); if(event.key==='Escape'){clNewCatOpen=false;renderChecklist();}">
+      <button class="cl-add-btn" onclick="confirmNewCat()">✓</button>
+      <button class="cl-cat-edit" onclick="clNewCatOpen=false;renderChecklist()" title="Annuler">✕</button>
+    </div>
+    ` : `<button class="cl-cat-add-btn" onclick="clNewCatOpen=true;renderChecklist();setTimeout(()=>{const i=document.getElementById('cl-newcat-input');if(i)i.focus();},50)">＋ Nouvelle catégorie</button>`}
 
     <div class="cl-footer">
       <div class="cl-progress">${done > 0 ? `<strong>${done}</strong>/${total} fait${done > 1 ? 's' : ''}` : total > 0 ? `0/${total} — rien de coché` : ''}  </div>
       <div style="display:flex;gap:8px">
         ${done > 0 ? `<button class="cl-reset-btn" onclick="resetChecklist()">↺ Tout décocher</button>` : ''}
-        ${total > 0 ? `<button class="cl-reset-btn" onclick="clearChecklist()">🗑 Vider</button>` : ''}
+        ${total > 0 ? (clConfirmClear
+          ? `<button class="cl-reset-btn cl-confirm-del" onclick="clearChecklist()">✓ Confirmer</button><button class="cl-reset-btn" onclick="clConfirmClear=false;renderChecklist()">Annuler</button>`
+          : `<button class="cl-reset-btn" onclick="clConfirmClear=true;renderChecklist()">🗑 Vider</button>`) : ''}
       </div>
     </div>`;
 }
 
-function switchClCat(cat) { clActiveCat = cat; clAddTargetCat = null; renderChecklist(); }
+function switchClCat(cat) {
+  clActiveCat = cat; clAddTargetCat = null;
+  clNewCatOpen = false; clRenameCatId = null; clConfirmDeleteCat = null; clConfirmClear = false;
+  renderChecklist();
+}
 
 function addClItem() {
   const inp    = document.getElementById('cl-input');
@@ -225,32 +247,42 @@ function clDragEnd(ev) {
 }
 
 // ── CHECKLIST CATÉGORIES ──────────────────────────────────────
-function addClCategory() {
-  const name = prompt('Nom de la nouvelle catégorie :');
-  if (!name || !name.trim()) return;
+function confirmNewCat() {
+  const inp  = document.getElementById('cl-newcat-input');
+  const name = inp ? inp.value.trim() : '';
+  clNewCatOpen = false;
+  if (!name) { renderChecklist(); return; }
   const cl = getVoyageChecklist();
-  cl[clActiveCat].push({ id: newClCatId(), name: name.trim(), items: [] });
+  cl[clActiveCat].push({ id: newClCatId(), name, items: [] });
   saveVoyageChecklist(cl); renderChecklist();
 }
 
-function renameClCategory(ci) {
-  const cl  = getVoyageChecklist();
-  const cat = cl[clActiveCat][ci];
-  const name = prompt('Renommer la catégorie :', cat.name);
-  if (!name || !name.trim()) return;
-  cat.name = name.trim();
+function toggleRenameCat(id) {
+  clRenameCatId = id;
+  renderChecklist();
+  setTimeout(() => { const el = document.getElementById(`cl-rename-input-${cl_findCatIndexById(id)}`); if (el) { el.focus(); el.select(); } }, 50);
+}
+function cl_findCatIndexById(id) {
+  const cl = getVoyageChecklist();
+  return cl[clActiveCat].findIndex(c => c.id === id);
+}
+
+function confirmRenameCat(ci) {
+  if (clRenameCatId === null) return;
+  const inp  = document.getElementById(`cl-rename-input-${ci}`);
+  const name = inp ? inp.value.trim() : '';
+  const cl   = getVoyageChecklist();
+  if (name) cl[clActiveCat][ci].name = name;
+  clRenameCatId = null;
   saveVoyageChecklist(cl); renderChecklist();
 }
 
 function deleteClCategory(ci) {
   const cl   = getVoyageChecklist();
   const cats = cl[clActiveCat];
-  if (cats.length <= 1) { showToast('Impossible de supprimer la dernière catégorie.'); return; }
+  clConfirmDeleteCat = null;
+  if (cats.length <= 1) { showToast('Impossible de supprimer la dernière catégorie.'); renderChecklist(); return; }
   const cat = cats[ci];
-  const msg = cat.items.length
-    ? `Supprimer la catégorie "${cat.name}" ? Ses ${cat.items.length} item(s) seront déplacés vers une autre catégorie.`
-    : `Supprimer la catégorie "${cat.name}" ?`;
-  if (!confirm(msg)) return;
   let fallback = cats.find((c, idx) => idx !== ci && c.name === 'Divers') || cats.find((c, idx) => idx !== ci);
   fallback.items.push(...cat.items);
   cats.splice(ci, 1);
@@ -303,7 +335,7 @@ function resetChecklist() {
 }
 
 function clearChecklist() {
-  if (!confirm('Vider toute la liste ?')) return;
+  clConfirmClear = false;
   const cl = getVoyageChecklist();
   cl[clActiveCat].forEach(c => c.items = []);
   saveVoyageChecklist(cl); renderChecklist();
@@ -328,17 +360,6 @@ function saveAsTemplate(cat) {
   if (!items.length) { showToast('La liste est vide.'); return; }
   localStorage.setItem('mv-cl-tpl-' + cat, JSON.stringify(items));
   showToast(`💾 Modèle sauvegardé (${items.length} item(s))`);
-}
-
-function copyFromOtherCat(fromCat) {
-  const cl = getVoyageChecklist();
-  const destCats = cl[clActiveCat];
-  const dest = destCats.find(c => c.name === 'Divers') || destCats[0];
-  const existing = new Set(destCats.flatMap(c => c.items.map(i => i.text)));
-  (cl[fromCat] || []).flatMap(c => c.items).forEach(i => {
-    if (!existing.has(i.text)) { dest.items.push({ text: i.text, checked: false }); existing.add(i.text); }
-  });
-  saveVoyageChecklist(cl); renderChecklist();
 }
 
 // ── CHECKLIST AUTOCOMPLETE ────────────────────────────────────
