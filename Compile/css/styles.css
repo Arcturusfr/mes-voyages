@@ -104,7 +104,7 @@ main{padding:22px 24px}
 .gscroll{overflow-x:scroll;-webkit-overflow-scrolling:touch;scrollbar-width:none;cursor:grab}
 .gscroll-arrow{position:absolute;top:0;width:28px;height:44px;max-height:100%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;background:var(--sea-deep);color:#fff;font-size:1.1rem;font-weight:700;border:none;transition:background .2s;pointer-events:all;overflow:hidden}
 .gscroll-arrow:hover{background:var(--sea)}
-.gscroll-arrow.left{left:260px;border-radius:0 4px 4px 0}
+.gscroll-arrow.left{left:312px;border-radius:0 4px 4px 0}
 .gscroll-arrow.right{right:0;border-radius:4px 0 0 4px}
 .gscroll::-webkit-scrollbar{display:none}
 .gscroll.dragging{cursor:grabbing;user-select:none}
@@ -114,21 +114,21 @@ main{padding:22px 24px}
 .gantt-head{display:flex;user-select:none;background:var(--theme-bg,var(--sea-deep));color:var(--theme-tx,#fff);transition:background .25s,color .25s;position:relative}
 .gscroll-arrow{position:absolute;top:0;width:28px;height:var(--head-h,44px);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;background:var(--sea-deep);color:#fff;font-size:1.1rem;font-weight:700;border:none;transition:background .2s;pointer-events:all}
 .gscroll-arrow:hover{background:var(--sea)}
-.gscroll-arrow.left{left:260px;border-radius:0 4px 4px 0}
+.gscroll-arrow.left{left:312px;border-radius:0 4px 4px 0}
 .gscroll-arrow.right{right:0;border-radius:4px 0 0 4px}
-.gh-label{width:260px;min-width:260px;padding:7px 12px;border-right:1px solid var(--theme-sep,rgba(255,255,255,.1));position:sticky;left:0;z-index:4;background:var(--theme-bg,var(--sea-deep));box-sizing:border-box;transition:background .25s,color .25s;display:flex;flex-direction:row;align-items:center;gap:8px;flex-wrap:nowrap}
+.gh-label{width:312px;min-width:312px;padding:7px 12px;border-right:1px solid var(--theme-sep,rgba(255,255,255,.1));position:sticky;left:0;z-index:4;background:var(--theme-bg,var(--sea-deep));box-sizing:border-box;transition:background .25s,color .25s;display:flex;flex-direction:row;align-items:center;gap:8px;flex-wrap:nowrap}
 .gh-label-title{font-size:1.05rem;text-transform:uppercase;letter-spacing:1.2px;font-weight:700;font-family:'Jost',sans-serif;color:#fff;white-space:nowrap;flex-shrink:0}
 .gh-year-nav{display:flex;align-items:center;gap:4px;flex-shrink:0}
 .gh-yr-btn{width:24px;height:24px;border-radius:50%;border:1.5px solid rgba(255,255,255,.45);background:rgba(255,255,255,.2);cursor:pointer;color:#fff;font-size:.85rem;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:'Jost',sans-serif}
 .gh-yr-btn:hover{background:rgba(255,255,255,.45)}
 .gh-year{font-family:'Jost',sans-serif;font-size:1.1rem;font-weight:700;color:var(--theme-tx,#fff);min-width:40px;text-align:center}
-.gh-mon{width:var(--mcw,80px);min-width:var(--mcw,80px);padding:10px 3px;text-align:center;font-size:.85rem;font-weight:600;border-right:1px solid var(--theme-sep,rgba(255,255,255,.1));box-sizing:border-box;flex-shrink:0;font-family:'Jost',sans-serif;letter-spacing:.3px}
+.gh-mon{width:var(--mcw,80px);min-width:var(--mcw,80px);padding:10px 3px;text-align:center;font-size:1.3rem;font-weight:600;border-right:1px solid var(--theme-sep,rgba(255,255,255,.1));box-sizing:border-box;flex-shrink:0;font-family:'Jost',sans-serif;letter-spacing:.3px}
 .gh-mon.cur{background:rgba(0,0,0,.12);font-weight:800}
 
 /* Gantt Data rows */
 .gantt-row{display:flex;border-bottom:1px solid var(--border);min-height:78px;cursor:pointer;transition:background .15s}
 .gantt-row:hover{background:var(--row-hover)}.gantt-row:last-child{border-bottom:none}
-.ginfo{width:260px;min-width:260px;padding:8px 12px;display:flex;flex-direction:column;justify-content:center;gap:4px;border-right:1px solid var(--border);position:sticky;left:0;background:var(--bg-card);z-index:2;box-shadow:3px 0 8px rgba(26,95,128,.06);box-sizing:border-box;flex-shrink:0}
+.ginfo{width:312px;min-width:312px;padding:8px 12px;display:flex;flex-direction:column;justify-content:center;gap:4px;border-right:1px solid var(--border);position:sticky;left:0;background:var(--bg-card);z-index:2;box-shadow:3px 0 8px rgba(26,95,128,.06);box-sizing:border-box;flex-shrink:0}
 .gantt-row:hover .ginfo{background:var(--row-hover)}
 .gdest{font-weight:700;font-size:1.3rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'Jost',sans-serif;color:var(--text-main)}
 .ghotel{font-size:1.05rem;color:var(--text-mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:italic;font-weight:500}
