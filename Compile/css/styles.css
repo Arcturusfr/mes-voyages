@@ -1,4 +1,4 @@
-/* v2026-08-16_21h21 — modifs Claude : colonne gauche 312px, tailles agrandies (gantt) */
+/* v2026-08-16_21h39 — modifs Claude : checklist — pliage/dépliage des catégories (chevron) */
 /* ── LIGHT MODE (default) ────────────────────────────────── */
 :root {
   --ink: #1a2e3a; --paper: #f4f8fb; --sand: #d8eaf4; --sand2: #e8f3f9;
@@ -338,7 +338,8 @@ select.fi{cursor:pointer}
 .cl-cat-header.dragging{opacity:.4}
 .cl-cat-header.drag-over{border-color:var(--ocean);background:var(--sky)}
 .cl-cat-header-solo .cl-item-handle{visibility:hidden}
-.cl-cat-name{flex:1;font-size:.78rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-light);font-weight:600}
+.cl-cat-chevron{cursor:pointer;color:var(--text-light);font-size:.7rem;width:14px;flex-shrink:0;text-align:center;user-select:none}
+.cl-cat-name{flex:1;font-size:.78rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-light);font-weight:600;cursor:pointer}
 .cl-cat-count{font-size:.72rem;color:var(--text-mid);font-weight:600;background:var(--sand2);padding:1px 8px;border-radius:10px;flex-shrink:0}
 .cl-cat-edit{background:none;border:none;cursor:pointer;color:var(--text-light);font-size:.9rem;padding:2px 4px;border-radius:4px;transition:color .15s}
 .cl-cat-edit:hover{color:var(--ocean)}
