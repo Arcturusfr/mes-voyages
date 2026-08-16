@@ -82,10 +82,10 @@ function renderChecklist() {
       <input class="cl-add-input" id="cl-input" placeholder="Ajouter un item…" autocomplete="off"
         oninput="showClSuggest(this.value)" onblur="hideClSuggest()"
         onkeydown="if(event.key==='Enter')addClItem()">
-      <select class="cl-add-cat-select" id="cl-add-cat" title="Catégorie de destination">
+      <select class="cl-add-cat-select" id="cl-add-cat" title="Catégorie de destination" onchange="clAddTargetCat=this.value">
         ${cats.map(c => `<option value="${c.id}" ${c.id === clAddTargetCat ? 'selected' : ''}>${c.name}</option>`).join('')}
       </select>
-      <button class="cl-add-btn" onclick="addClItem()">＋</button>
+      <button class="cl-add-btn" onmousedown="event.preventDefault();addClItem()">＋</button>
       <div class="cl-suggest" id="cl-suggest" style="display:none"></div>
     </div>
 
@@ -140,7 +140,7 @@ function renderChecklist() {
     <div class="cl-add-row">
       <input class="cl-add-input" id="cl-newcat-input" placeholder="Nom de la catégorie…" autocomplete="off"
         onkeydown="if(event.key==='Enter')confirmNewCat(); if(event.key==='Escape'){clNewCatOpen=false;renderChecklist();}">
-      <button class="cl-add-btn" onclick="confirmNewCat()">✓</button>
+      <button class="cl-add-btn" onmousedown="event.preventDefault();confirmNewCat()">✓</button>
       <button class="cl-cat-edit" onclick="clNewCatOpen=false;renderChecklist()" title="Annuler">✕</button>
     </div>
     ` : `<button class="cl-cat-add-btn" onclick="clNewCatOpen=true;renderChecklist();setTimeout(()=>{const i=document.getElementById('cl-newcat-input');if(i)i.focus();},50)">＋ Nouvelle catégorie</button>`}
