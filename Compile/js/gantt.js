@@ -1,3 +1,4 @@
+// v2026-08-16_21h21 — modifs Claude : 4 mois visibles, largeur colonne 312px
 // ── GANTT ─────────────────────────────────────────────────────
 let monthOffset = new Date().getMonth();
 
