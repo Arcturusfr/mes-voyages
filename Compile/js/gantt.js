@@ -15,7 +15,7 @@ function shiftMonths(d) {
 function getMonthColWidth() {
   const wrap = document.querySelector('.gwrap');
   if (!wrap) return 80;
-  return Math.floor((wrap.clientWidth - 260) / 5);
+  return Math.floor((wrap.clientWidth - 312) / 4);
 }
 
 function renderGantt() {
