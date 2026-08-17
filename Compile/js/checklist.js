@@ -1,4 +1,4 @@
-// v2026-08-16_21h39 — modifs Claude : checklist — pliage/dépliage des catégories (chevron)
+// v2026-08-17_19h42 — modifs Claude : checklist — jauge de progression colorée
 // ── CHECKLIST ─────────────────────────────────────────────────
 let clAddTargetCat     = null;
 let clNewCatOpen        = false;
@@ -81,6 +81,11 @@ function renderChecklist() {
       <button class="cl-tab ${cat === 'surSoi'  ? 'active' : ''}" onclick="switchClCat('surSoi')">👜 Sur soi (${(cl.surSoi||[]).reduce((n,c)=>n+c.items.length,0)})</button>
       <button class="cl-tab ${cat === 'actions' ? 'active' : ''}" onclick="switchClCat('actions')">⚡ Actions (${(cl.actions||[]).reduce((n,c)=>n+c.items.length,0)})</button>
     </div>
+    ${total > 0 ? `
+    <div class="cl-gauge-wrap" title="${done}/${total} coché(s)">
+      <div class="cl-gauge-fill" style="width:${Math.round(done / total * 100)}%"></div>
+      <span class="cl-gauge-label">${done}/${total} ${done === total ? '🎉' : `· ${Math.round(done / total * 100)}%`}</span>
+    </div>` : ''}
     <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
       <button class="cl-template-btn" onclick="loadTemplate('${cat}')">📋 Charger modèle</button>
       <button class="cl-template-btn" onclick="saveAsTemplate('${cat}')">💾 Sauver comme modèle</button>
