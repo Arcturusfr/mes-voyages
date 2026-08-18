@@ -1,6 +1,16 @@
-// v2026-08-16_21h21 — modifs Claude : 4 mois visibles, largeur colonne 312px
+// v2026-08-18_17h10 — modifs Claude : nb de colonnes visibles réglable (1/2/3/4/6/8/12), emoji 🏡 romain, largeur colonne 312px
 // ── GANTT ─────────────────────────────────────────────────────
 let monthOffset = new Date().getMonth();
+const COL_STEPS = [1, 2, 3, 4, 6, 8, 12];
+let visibleMonths = 4;
+
+function changeVisibleMonths(d) {
+  const idx = COL_STEPS.indexOf(visibleMonths);
+  const newIdx = Math.min(COL_STEPS.length - 1, Math.max(0, idx + d));
+  if (COL_STEPS[newIdx] === visibleMonths) return;
+  visibleMonths = COL_STEPS[newIdx];
+  renderGantt();
+}
 
 function changeYear(d) {
   cy += d;
@@ -16,7 +26,7 @@ function shiftMonths(d) {
 function getMonthColWidth() {
   const wrap = document.querySelector('.gwrap');
   if (!wrap) return 80;
-  return Math.floor((wrap.clientWidth - 312) / 4);
+  return Math.floor((wrap.clientWidth - 312) / visibleMonths);
 }
 
 function renderGantt() {
@@ -64,7 +74,7 @@ function renderGantt() {
 
   let rows = '';
   if (!list.length) {
-    rows = `<div class="gempty">🌴 Aucun séjour en ${cy}${filter !== 'all' ? ' (filtre actif)' : ''}.</div>`;
+    rows = `<div class="gempty"><span class="ic-roman">🌴</span> Aucun séjour en ${cy}${filter !== 'all' ? ' (filtre actif)' : ''}.</div>`;
   } else {
     list.forEach(t => {
       const days    = diy(t.start, t.end, cy);
@@ -89,7 +99,7 @@ function renderGantt() {
       rows += `<div class="gantt-row" onclick="openDetail('${t.id}')">
         <div class="ginfo">
           <div class="gdest">${t.destination}${pill}</div>
-          ${t.hotel ? `<div class="ghotel">🏨 ${t.hotel}${(t.hotelSvcs || []).map(k => { const s = HOTEL_SVCS.find(x => x.key === k); return s ? `<span class="ghotel-svc">${s.icon}</span>` : ''; }).join('')}</div>` : ''}
+          ${t.hotel ? `<div class="ghotel"><span class="ic-roman">🏡</span> ${t.hotel}${(t.hotelSvcs || []).map(k => { const s = HOTEL_SVCS.find(x => x.key === k); return s ? `<span class="ghotel-svc">${s.icon}</span>` : ''; }).join('')}</div>` : ''}
           <div class="gdates-row">${fd(t.start)} → ${fd(t.end)}</div>
           <div class="gmeta">${badge(t.status)}<span class="gdur">${dur}j</span></div>
         </div>
@@ -114,6 +124,11 @@ function renderGantt() {
             <button class="gh-yr-btn" onclick="changeYear(-1)">‹</button>
             <span class="gh-year">${cy}</span>
             <button class="gh-yr-btn" onclick="changeYear(1)">›</button>
+          </div>
+          <div class="gh-col-nav" title="Nombre de mois affichés">
+            <button class="gh-yr-btn" onclick="changeVisibleMonths(-1)"${visibleMonths === COL_STEPS[0] ? ' disabled' : ''}>−</button>
+            <span class="gh-col-count">${visibleMonths}</span>
+            <button class="gh-yr-btn" onclick="changeVisibleMonths(1)"${visibleMonths === COL_STEPS[COL_STEPS.length - 1] ? ' disabled' : ''}>+</button>
           </div>
         </div>
         ${headMons}
@@ -193,7 +208,7 @@ function renderGroupPanel(groups, year) {
   );
 
   if (!alerts.length) {
-    wrap.innerHTML = '<div style="padding:20px;text-align:center;color:#bbb;font-style:italic">✓ Aucun problème détecté pour cette année.</div>';
+    wrap.innerHTML = '<div style="padding:20px;text-align:center;color:#bbb;font-style:italic"><span class="ic-roman">✓</span> Aucun problème détecté pour cette année.</div>';
     return;
   }
 
@@ -221,7 +236,7 @@ function renderGroupPanel(groups, year) {
               <div class="gstay-dot" style="background:${s.color || COLORS[0]}"></div>
               <span class="gstay-name">${s.destination}</span>
               <span class="gstay-dates">${fd(s.start)} → ${fd(s.end)} (${dur}j)</span>
-              ${s.hotel ? `<span class="gstay-hotel">🏨 ${s.hotel}</span>` : ''}
+              ${s.hotel ? `<span class="gstay-hotel"><span class="ic-roman">🏡</span> ${s.hotel}</span>` : ''}
             </div>`;
           }).join('')}
         </div>
