@@ -1,4 +1,4 @@
-/* v2026-08-17_19h42 — modifs Claude : checklist — jauge de progression colorée */
+/* v2026-08-18_17h10 — modifs Claude : sélecteur nb de mois visibles (gantt), emoji toujours romains (.ic-roman) */
 /* ── LIGHT MODE (default) ────────────────────────────────── */
 :root {
   --ink: #1a2e3a; --paper: #f4f8fb; --sand: #d8eaf4; --sand2: #e8f3f9;
@@ -38,6 +38,8 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box;margin:0;padding:0}
+/* UTILITAIRE */
+.ic-roman{font-style:normal}
 html{scroll-behavior:smooth}
 body{font-family:'Jost',sans-serif;background:var(--bg-page);color:var(--text-main);min-height:100vh;transition:background .3s,color .3s}
 
@@ -117,12 +119,15 @@ main{padding:22px 24px}
 .gscroll-arrow:hover{background:var(--sea)}
 .gscroll-arrow.left{left:312px;border-radius:0 4px 4px 0}
 .gscroll-arrow.right{right:0;border-radius:4px 0 0 4px}
-.gh-label{width:312px;min-width:312px;padding:7px 12px;border-right:1px solid var(--theme-sep,rgba(255,255,255,.1));position:sticky;left:0;z-index:4;background:var(--theme-bg,var(--sea-deep));box-sizing:border-box;transition:background .25s,color .25s;display:flex;flex-direction:row;align-items:center;gap:8px;flex-wrap:nowrap}
+.gh-label{width:312px;min-width:312px;padding:7px 12px;border-right:1px solid var(--theme-sep,rgba(255,255,255,.1));position:sticky;left:0;z-index:4;background:var(--theme-bg,var(--sea-deep));box-sizing:border-box;transition:background .25s,color .25s;display:flex;flex-direction:row;align-items:center;gap:8px;flex-wrap:wrap;row-gap:4px}
 .gh-label-title{font-size:1.05rem;text-transform:uppercase;letter-spacing:1.2px;font-weight:700;font-family:'Jost',sans-serif;color:#fff;white-space:nowrap;flex-shrink:0}
 .gh-year-nav{display:flex;align-items:center;gap:4px;flex-shrink:0}
 .gh-yr-btn{width:24px;height:24px;border-radius:50%;border:1.5px solid rgba(255,255,255,.45);background:rgba(255,255,255,.2);cursor:pointer;color:#fff;font-size:.85rem;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:'Jost',sans-serif}
 .gh-yr-btn:hover{background:rgba(255,255,255,.45)}
+.gh-yr-btn:disabled{opacity:.35;cursor:default;pointer-events:none}
 .gh-year{font-family:'Jost',sans-serif;font-size:1.1rem;font-weight:700;color:var(--theme-tx,#fff);min-width:40px;text-align:center}
+.gh-col-nav{display:flex;align-items:center;gap:4px;flex-shrink:0;padding-left:6px;border-left:1px solid var(--theme-sep,rgba(255,255,255,.18))}
+.gh-col-count{font-family:'Jost',sans-serif;font-size:.9rem;font-weight:700;color:var(--theme-tx,#fff);min-width:16px;text-align:center}
 .gh-mon{width:var(--mcw,80px);min-width:var(--mcw,80px);padding:10px 3px;text-align:center;font-size:1.3rem;font-weight:600;border-right:1px solid var(--theme-sep,rgba(255,255,255,.1));box-sizing:border-box;flex-shrink:0;font-family:'Jost',sans-serif;letter-spacing:.3px}
 .gh-mon.cur{background:rgba(0,0,0,.12);font-weight:800}
 
