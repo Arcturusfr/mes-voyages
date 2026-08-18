@@ -1,8 +1,33 @@
-// v2026-08-18_17h10 — modifs Claude : nb de colonnes visibles réglable (1/2/3/4/6/8/12), emoji 🏡 romain, largeur colonne 312px
+// v2026-08-18_18h05 — modifs Claude : en-tête figé + scroll vertical, focus initial sur le voyage en cours/prochain/dernier
 // ── GANTT ─────────────────────────────────────────────────────
 let monthOffset = new Date().getMonth();
 const COL_STEPS = [1, 2, 3, 4, 6, 8, 12];
 let visibleMonths = 4;
+
+// Focus initial (une seule fois par chargement de l'app) sur le voyage en cours,
+// sinon le prochain, sinon le dernier passé.
+let didInitAutoFocus = false;
+let pendingFocusTripId = null;
+
+function getDefaultFocusTrip() {
+  const now = new Date();
+  const pool = trips.filter(t => t.status !== 'cancel');
+
+  const ongoing = pool
+    .filter(t => new Date(t.start) <= now && new Date(t.end) >= now)
+    .sort((a, b) => new Date(a.start) - new Date(b.start))[0];
+  if (ongoing) return ongoing;
+
+  const upcoming = pool
+    .filter(t => new Date(t.start) > now)
+    .sort((a, b) => new Date(a.start) - new Date(b.start))[0];
+  if (upcoming) return upcoming;
+
+  const past = pool
+    .filter(t => new Date(t.end) < now)
+    .sort((a, b) => new Date(b.end) - new Date(a.end))[0];
+  return past || null;
+}
 
 function changeVisibleMonths(d) {
   const idx = COL_STEPS.indexOf(visibleMonths);
@@ -30,6 +55,21 @@ function getMonthColWidth() {
 }
 
 function renderGantt() {
+  if (!didInitAutoFocus) {
+    didInitAutoFocus = true;
+    const target = getDefaultFocusTrip();
+    if (target) {
+      pendingFocusTripId = target.id;
+      const ty = new Date(target.start).getFullYear();
+      monthOffset = new Date(target.start).getMonth();
+      if (ty !== cy) {
+        cy = ty;
+        renderGantt();
+        return;
+      }
+    }
+  }
+
   const allFiltered = ft();
   const list = allFiltered.filter(t => {
     const s = new Date(t.start), e = new Date(t.end);
@@ -96,7 +136,7 @@ function renderGantt() {
         `<div class="gcol${isCY && i === curMonth ? ' cur' : ''}"></div>`
       ).join('');
 
-      rows += `<div class="gantt-row" onclick="openDetail('${t.id}')">
+      rows += `<div class="gantt-row" data-tid="${t.id}" onclick="openDetail('${t.id}')">
         <div class="ginfo">
           <div class="gdest">${t.destination}${pill}</div>
           ${t.hotel ? `<div class="ghotel"><span class="ic-roman">🏡</span> ${t.hotel}${(t.hotelSvcs || []).map(k => { const s = HOTEL_SVCS.find(x => x.key === k); return s ? `<span class="ghotel-svc">${s.icon}</span>` : ''; }).join('')}</div>` : ''}
@@ -140,6 +180,15 @@ function renderGantt() {
   if (sc) {
     sc.scrollLeft = Math.max(0, (monthOffset - 0.5) * mcw);
     initDrag(sc);
+  }
+
+  if (pendingFocusTripId) {
+    const focusId = pendingFocusTripId;
+    pendingFocusTripId = null;
+    requestAnimationFrame(() => {
+      const rowEl = document.querySelector(`.gantt-row[data-tid="${focusId}"]`);
+      if (rowEl) rowEl.scrollIntoView({ block: 'center', inline: 'nearest' });
+    });
   }
 
   renderGroupPanel(groups, cy);
