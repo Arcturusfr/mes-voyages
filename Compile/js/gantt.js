@@ -1,4 +1,4 @@
-// v2026-08-18_18h05 — modifs Claude : en-tête figé + scroll vertical, focus initial sur le voyage en cours/prochain/dernier
+// v2026-08-18_18h30 — modifs Claude : sous-division en semaines quand 1-2 mois affichés
 // ── GANTT ─────────────────────────────────────────────────────
 let monthOffset = new Date().getMonth();
 const COL_STEPS = [1, 2, 3, 4, 6, 8, 12];
@@ -108,8 +108,23 @@ function renderGantt() {
 
   document.querySelector('.gwrap').style.setProperty('--mcw', mcw + 'px');
 
+  // Sous-division en semaines (uniquement si 1 ou 2 mois affichés : assez de place pour rester lisible)
+  const showWeeks = visibleMonths <= 2;
+  const weekSepHtml = MF.map((_, i) => {
+    if (!showWeeks) return '';
+    const daysInMonth = new Date(cy, i + 1, 0).getDate();
+    let html = '';
+    for (let d = 2; d <= daysInMonth; d++) {
+      if (new Date(cy, i, d).getDay() === 1) { // lundi = début de semaine
+        const pct = ((d - 1) / daysInMonth) * 100;
+        html += `<div class="gweek-sep" style="left:${pct}%"></div>`;
+      }
+    }
+    return html;
+  });
+
   const headMons = MF.map((m, i) =>
-    `<div class="gh-mon${isCY && i === curMonth ? ' cur' : ''}">${m}</div>`
+    `<div class="gh-mon${isCY && i === curMonth ? ' cur' : ''}">${m}${weekSepHtml[i]}</div>`
   ).join('');
 
   let rows = '';
@@ -133,7 +148,7 @@ function renderGantt() {
       }
 
       const cols = Array(12).fill(0).map((_, i) =>
-        `<div class="gcol${isCY && i === curMonth ? ' cur' : ''}"></div>`
+        `<div class="gcol${isCY && i === curMonth ? ' cur' : ''}">${weekSepHtml[i]}</div>`
       ).join('');
 
       rows += `<div class="gantt-row" data-tid="${t.id}" onclick="openDetail('${t.id}')">
