@@ -1,4 +1,4 @@
-/* v2026-08-18_17h10 — modifs Claude : sélecteur nb de mois visibles (gantt), emoji toujours romains (.ic-roman) */
+/* v2026-08-18_18h30 — modifs Claude : séparateurs de semaines (pointillés) dans les colonnes mois quand 1-2 mois affichés */
 /* ── LIGHT MODE (default) ────────────────────────────────── */
 :root {
   --ink: #1a2e3a; --paper: #f4f8fb; --sand: #d8eaf4; --sand2: #e8f3f9;
@@ -130,7 +130,7 @@ main{padding:22px 24px}
 .gh-year{font-family:'Jost',sans-serif;font-size:1.1rem;font-weight:700;color:var(--theme-tx,#fff);min-width:40px;text-align:center}
 .gh-col-nav{display:flex;align-items:center;gap:4px;flex-shrink:0;padding-left:6px;border-left:1px solid var(--theme-sep,rgba(255,255,255,.18))}
 .gh-col-count{font-family:'Jost',sans-serif;font-size:.9rem;font-weight:700;color:var(--theme-tx,#fff);min-width:16px;text-align:center}
-.gh-mon{width:var(--mcw,80px);min-width:var(--mcw,80px);padding:10px 3px;text-align:center;font-size:1.3rem;font-weight:600;border-right:1px solid var(--theme-sep,rgba(255,255,255,.1));box-sizing:border-box;flex-shrink:0;font-family:'Jost',sans-serif;letter-spacing:.3px}
+.gh-mon{width:var(--mcw,80px);min-width:var(--mcw,80px);padding:10px 3px;text-align:center;font-size:1.3rem;font-weight:600;border-right:1px solid var(--theme-sep,rgba(255,255,255,.1));box-sizing:border-box;flex-shrink:0;font-family:'Jost',sans-serif;letter-spacing:.3px;position:relative}
 .gh-mon.cur{background:rgba(0,0,0,.12);font-weight:800}
 
 /* Gantt Data rows */
@@ -147,8 +147,11 @@ main{padding:22px 24px}
 
 /* Gantt Month cells */
 .gcols{display:flex;flex:1;position:relative}
-.gcol{width:var(--mcw,80px);min-width:var(--mcw,80px);border-right:1px solid var(--border2);box-sizing:border-box;flex-shrink:0}
+.gcol{width:var(--mcw,80px);min-width:var(--mcw,80px);border-right:1px solid var(--border2);box-sizing:border-box;flex-shrink:0;position:relative}
 .gcol.cur{background:rgba(100,180,220,.08)}
+.gweek-sep{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed;pointer-events:none}
+.gh-mon .gweek-sep{border-left-color:rgba(255,255,255,.4);top:4px;bottom:4px}
+.gcol .gweek-sep{border-left-color:var(--border2);opacity:.7}
 
 /* Gantt Bar */
 .gbar-track{position:absolute;inset:0;pointer-events:none}
