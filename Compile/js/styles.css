@@ -1,4 +1,4 @@
-/* v2026-08-17_19h42 — modifs Claude : checklist — jauge de progression colorée */
+/* v2026-08-18_18h30 — modifs Claude : séparateurs de semaines (pointillés) dans les colonnes mois quand 1-2 mois affichés */
 /* ── LIGHT MODE (default) ────────────────────────────────── */
 :root {
   --ink: #1a2e3a; --paper: #f4f8fb; --sand: #d8eaf4; --sand2: #e8f3f9;
@@ -17,6 +17,8 @@
   --theme-all-bg:#1a5f80; --theme-plan-bg:#7a5a00; --theme-confirm-bg:#1a5a30; --theme-cancel-bg:#7a2020;
   /* Dur tag readable */
   --dur-color:#1a5f80;
+  /* Hauteur max du tableau Gantt (scroll vertical, en-tête figé) */
+  --gantt-max-h:65vh;
 }
 
 /* ── DARK MODE — Nuit Méditerranéenne ────────────────────── */
@@ -38,6 +40,8 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box;margin:0;padding:0}
+/* UTILITAIRE */
+.ic-roman{font-style:normal!important}
 html{scroll-behavior:smooth}
 body{font-family:'Jost',sans-serif;background:var(--bg-page);color:var(--text-main);min-height:100vh;transition:background .3s,color .3s}
 
@@ -102,7 +106,7 @@ main{padding:22px 24px}
 /* GANTT */
 .th{display:flex;align-items:center;justify-content:flex-end;margin-bottom:12px;flex-wrap:wrap;gap:8px}
 .gwrap{background:var(--bg-card);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;position:relative}
-.gscroll{overflow-x:scroll;-webkit-overflow-scrolling:touch;scrollbar-width:none;cursor:grab}
+.gscroll{overflow-x:scroll;overflow-y:auto;max-height:var(--gantt-max-h);-webkit-overflow-scrolling:touch;scrollbar-width:none;cursor:grab}
 .gscroll-arrow{position:absolute;top:0;width:28px;height:44px;max-height:100%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;background:var(--sea-deep);color:#fff;font-size:1.1rem;font-weight:700;border:none;transition:background .2s;pointer-events:all;overflow:hidden}
 .gscroll-arrow:hover{background:var(--sea)}
 .gscroll-arrow.left{left:312px;border-radius:0 4px 4px 0}
@@ -112,18 +116,21 @@ main{padding:22px 24px}
 .gtable{display:inline-flex;flex-direction:column;min-width:100%}
 
 /* Gantt Header */
-.gantt-head{display:flex;user-select:none;background:var(--theme-bg,var(--sea-deep));color:var(--theme-tx,#fff);transition:background .25s,color .25s;position:relative}
+.gantt-head{display:flex;user-select:none;background:var(--theme-bg,var(--sea-deep));color:var(--theme-tx,#fff);transition:background .25s,color .25s;position:sticky;top:0;z-index:5}
 .gscroll-arrow{position:absolute;top:0;width:28px;height:var(--head-h,44px);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;background:var(--sea-deep);color:#fff;font-size:1.1rem;font-weight:700;border:none;transition:background .2s;pointer-events:all}
 .gscroll-arrow:hover{background:var(--sea)}
 .gscroll-arrow.left{left:312px;border-radius:0 4px 4px 0}
 .gscroll-arrow.right{right:0;border-radius:4px 0 0 4px}
-.gh-label{width:312px;min-width:312px;padding:7px 12px;border-right:1px solid var(--theme-sep,rgba(255,255,255,.1));position:sticky;left:0;z-index:4;background:var(--theme-bg,var(--sea-deep));box-sizing:border-box;transition:background .25s,color .25s;display:flex;flex-direction:row;align-items:center;gap:8px;flex-wrap:nowrap}
+.gh-label{width:312px;min-width:312px;padding:7px 12px;border-right:1px solid var(--theme-sep,rgba(255,255,255,.1));position:sticky;left:0;z-index:4;background:var(--theme-bg,var(--sea-deep));box-sizing:border-box;transition:background .25s,color .25s;display:flex;flex-direction:row;align-items:center;gap:8px;flex-wrap:wrap;row-gap:4px}
 .gh-label-title{font-size:1.05rem;text-transform:uppercase;letter-spacing:1.2px;font-weight:700;font-family:'Jost',sans-serif;color:#fff;white-space:nowrap;flex-shrink:0}
 .gh-year-nav{display:flex;align-items:center;gap:4px;flex-shrink:0}
 .gh-yr-btn{width:24px;height:24px;border-radius:50%;border:1.5px solid rgba(255,255,255,.45);background:rgba(255,255,255,.2);cursor:pointer;color:#fff;font-size:.85rem;display:flex;align-items:center;justify-content:center;transition:all .2s;font-family:'Jost',sans-serif}
 .gh-yr-btn:hover{background:rgba(255,255,255,.45)}
+.gh-yr-btn:disabled{opacity:.35;cursor:default;pointer-events:none}
 .gh-year{font-family:'Jost',sans-serif;font-size:1.1rem;font-weight:700;color:var(--theme-tx,#fff);min-width:40px;text-align:center}
-.gh-mon{width:var(--mcw,80px);min-width:var(--mcw,80px);padding:10px 3px;text-align:center;font-size:1.3rem;font-weight:600;border-right:1px solid var(--theme-sep,rgba(255,255,255,.1));box-sizing:border-box;flex-shrink:0;font-family:'Jost',sans-serif;letter-spacing:.3px}
+.gh-col-nav{display:flex;align-items:center;gap:4px;flex-shrink:0;padding-left:6px;border-left:1px solid var(--theme-sep,rgba(255,255,255,.18))}
+.gh-col-count{font-family:'Jost',sans-serif;font-size:.9rem;font-weight:700;color:var(--theme-tx,#fff);min-width:16px;text-align:center}
+.gh-mon{width:var(--mcw,80px);min-width:var(--mcw,80px);padding:10px 3px;text-align:center;font-size:1.3rem;font-weight:600;border-right:1px solid var(--theme-sep,rgba(255,255,255,.1));box-sizing:border-box;flex-shrink:0;font-family:'Jost',sans-serif;letter-spacing:.3px;position:relative}
 .gh-mon.cur{background:rgba(0,0,0,.12);font-weight:800}
 
 /* Gantt Data rows */
@@ -140,8 +147,11 @@ main{padding:22px 24px}
 
 /* Gantt Month cells */
 .gcols{display:flex;flex:1;position:relative}
-.gcol{width:var(--mcw,80px);min-width:var(--mcw,80px);border-right:1px solid var(--border2);box-sizing:border-box;flex-shrink:0}
+.gcol{width:var(--mcw,80px);min-width:var(--mcw,80px);border-right:1px solid var(--border2);box-sizing:border-box;flex-shrink:0;position:relative}
 .gcol.cur{background:rgba(100,180,220,.08)}
+.gweek-sep{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed;pointer-events:none}
+.gh-mon .gweek-sep{border-left-color:rgba(255,255,255,.4);top:4px;bottom:4px}
+.gcol .gweek-sep{border-left-color:var(--border2);opacity:.7}
 
 /* Gantt Bar */
 .gbar-track{position:absolute;inset:0;pointer-events:none}
